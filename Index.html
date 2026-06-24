@@ -1,0 +1,3962 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LowestBid AI</title>
+
+  <style>
+    :root{
+      --dark:#05364a;
+      --blue:#0073cf;
+      --orange:#f58220;
+      --green:#16833a;
+      --bg:#eef2f6;
+      --line:#d9e1e8;
+      --text:#1d2730;
+      --muted:#687684;
+      --card:#fff;
+      --danger:#b42318;
+      --soft-blue:#edf7ff;
+      --soft-green:#e9f7ef;
+      --soft-orange:#fff4e8;
+      --diff:#fff3cd;
+      --best:#e9f7ef;
+      --l1-green:#2e8b57;
+      --l2-yellow:#d4af37;
+      --l3-orange:#d2691e;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Segoe UI",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    button,input,select{font-family:inherit}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:80;
+      background:var(--dark);
+      box-shadow:0 2px 14px rgba(0,0,0,.22);
+    }
+
+    .topbar-inner{
+      max-width:1600px;
+      margin:auto;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:13px 16px;
+    }
+
+    .logo{
+      color:#fff;
+      font-weight:900;
+      font-size:18px;
+      white-space:nowrap;
+    }
+
+    .logo small{
+      display:block;
+      font-size:11px;
+      color:#b9d7e4;
+      margin-top:2px;
+      font-weight:600;
+    }
+
+    .global-search{
+      flex:1;
+      display:flex;
+      background:#fff;
+      border-radius:4px;
+      overflow:hidden;
+    }
+
+    .global-search input{
+      width:100%;
+      border:0;
+      outline:0;
+      padding:13px 14px;
+      font-size:15px;
+    }
+
+    .global-search button,
+    .sync-btn,
+    .primary-btn{
+      border:0;
+      background:var(--orange);
+      color:#fff;
+      font-weight:900;
+      padding:0 18px;
+      cursor:pointer;
+    }
+
+    .sync-btn{
+      background:var(--blue);
+      height:43px;
+      border-radius:4px;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:none;
+      margin:0;
+      padding:10px 14px 80px;
+    }
+
+    .hero{
+      display:none;
+    }
+
+    .hero h1{
+      margin:0;
+      color:var(--dark);
+      font-size:23px;
+    }
+
+    .hero p{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:30px;
+      font-size:12px;
+      font-weight:900;
+      border:1px solid #cfe4f5;
+      background:var(--soft-blue);
+      color:#07598a;
+      white-space:nowrap;
+    }
+
+    .status-pill{
+      background:var(--soft-green);
+      color:var(--green);
+      border-color:#bfe8cf;
+    }
+
+    .danger-pill{
+      background:#fff1f0;
+      color:var(--danger);
+      border-color:#ffd0cc;
+    }
+
+    .orange-pill{
+      background:var(--soft-orange);
+      color:#9a4b00;
+      border-color:#ffd9ad;
+    }
+
+    .panel{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:8px;
+      box-shadow:0 2px 8px rgba(5,54,74,.05);
+    }
+
+    .loader{
+      padding:32px;
+      text-align:center;
+      font-weight:900;
+      color:var(--dark);
+    }
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin:14px 0 10px;
+    }
+
+    .section-head h2{
+      margin:0;
+      color:var(--dark);
+      font-size:20px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+
+
+    /* GeM-style category marketplace cards */
+    .gem-category-shell{
+      width:100%;
+      overflow:hidden;
+      border-radius:6px;
+      background:#fff;
+      border:1px solid #d6dee6;
+      box-shadow:none;
+    }
+
+    .gem-category-toolbar{
+      position:sticky;
+      top:69px;
+      z-index:40;
+      min-height:57px;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      align-items:center;
+      gap:14px;
+      padding:0 22px;
+      background:#f8fafc;
+      border-bottom:1px solid #d9e1e8;
+    }
+
+    .gem-toolbar-left,
+    .gem-toolbar-right{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .gem-toolbar-right{
+      justify-content:flex-end;
+      grid-column:2 / 4;
+    }
+
+    .gem-toolbar-left h2{
+      margin:0;
+      color:#111827;
+      font-size:18px;
+      line-height:1;
+      font-weight:900;
+    }
+
+    .gem-reset-btn,
+    .gem-sort-select{
+      height:30px;
+      border:1px solid #d5dbe1;
+      background:#fff;
+      color:#111827;
+      border-radius:4px;
+      font-size:12px;
+      font-weight:800;
+      padding:0 12px;
+      cursor:pointer;
+      box-shadow:0 1px 1px rgba(0,0,0,.03);
+    }
+
+    .gem-sort-select{min-width:150px;}
+
+    .gem-sort-label{
+      color:#5d6874;
+      font-size:13px;
+      font-weight:800;
+      margin-right:2px;
+    }
+
+    .gem-count{
+      color:#5d6874;
+      font-size:13px;
+      white-space:nowrap;
+      margin-left:4px;
+    }
+
+    .gem-card-area{
+      padding:22px 23px 26px;
+      background:#fff;
+    }
+
+    .category-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:18px;
+      width:100%;
+    }
+
+    .category-card{
+      height:162px;
+      min-height:162px;
+      background:#fff;
+      border:1px solid #d6dee6;
+      border-radius:8px;
+      padding:19px 18px 16px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+      overflow:hidden;
+    }
+
+    .category-card:hover{
+      transform:translateY(-2px);
+      border-color:#b8cfdf;
+      box-shadow:0 7px 18px rgba(5,54,74,.10);
+    }
+
+    .category-card-top{min-height:48px;}
+
+    .category-card-name{
+      color:#0073b7;
+      font-size:16px;
+      line-height:1.28;
+      font-weight:900;
+      min-height:20px;
+      max-height:41px;
+      overflow:hidden;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      cursor:pointer;
+    }
+
+    .category-card-count{
+      margin-top:6px;
+      color:#4f5d6a;
+      font-size:14px;
+      line-height:20px;
+      min-height:20px;
+      white-space:nowrap;
+    }
+
+    .category-card-mid{
+      display:grid;
+      grid-template-columns:auto auto;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-top:12px;
+    }
+
+    .gem-ready-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:67px;
+      height:26px;
+      padding:0 14px;
+      border-radius:18px;
+      background:#e9f7ef;
+      border:1px solid #a7d8ba;
+      color:#16833a;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .gem-view-btn{
+      height:34px;
+      min-width:120px;
+      border:1px solid #d2d9df;
+      border-radius:4px;
+      background:#fff;
+      color:#111827;
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .gem-view-btn:hover{
+      background:#f7fafc;
+      border-color:#b9c4cc;
+    }
+
+    .category-card-updated{
+      margin-top:14px;
+      color:#5b6671;
+      font-size:12px;
+      line-height:16px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .category-skeleton{
+      min-height:163px;
+      border-radius:8px;
+      border:1px solid #d6dee6;
+      background:linear-gradient(90deg,#f4f6f8 25%,#eef2f6 37%,#f4f6f8 63%);
+      background-size:400% 100%;
+      animation:skeletonMove 1.25s ease infinite;
+    }
+
+    @keyframes skeletonMove{
+      0%{background-position:100% 50%}
+      100%{background-position:0 50%}
+    }
+
+    @media(max-width:1180px){
+      .category-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+    }
+
+    @media(max-width:900px){
+      .gem-category-toolbar{top:0; grid-template-columns:1fr; align-items:flex-start; padding:14px;}
+      .gem-toolbar-right{grid-column:auto; justify-content:flex-start;}
+      .category-grid{grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;}
+      .gem-card-area{padding:14px;}
+    }
+
+    @media(max-width:560px){
+      .category-grid{grid-template-columns:1fr;}
+      .category-card-mid{grid-template-columns:1fr; justify-content:stretch;}
+      .gem-view-btn{width:100%;}
+    }
+
+    .category-table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .category-table th{
+      background:#f7fafc;
+      color:#52616f;
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+      text-align:left;
+      padding:14px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .category-table td{
+      padding:14px;
+      border-bottom:1px solid #eef2f6;
+      font-size:14px;
+    }
+
+    .category-table tr:hover{background:#f8fbff}
+
+    .cat-name{
+      color:var(--blue);
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .action-btn,
+    .small-btn,
+    .back-btn{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--dark);
+      border-radius:4px;
+      padding:8px 12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .back-btn {
+      background: var(--blue);
+      color: #fff;
+      font-size: 14px;
+      padding: 10px 16px;
+      border: 1px solid var(--blue);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,115,207,0.2);
+    }
+    
+    .back-btn:hover {
+      background: #006eb6;
+      transform: translateY(-1px);
+    }
+
+    .small-btn{
+      padding:7px 10px;
+      font-size:13px;
+    }
+
+    .export-btn{
+      border:1px solid var(--green);
+      background:var(--green);
+      color:#fff;
+      border-radius:4px;
+      padding:8px 12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .export-btn.secondary{
+      background:#fff;
+      color:var(--green);
+    }
+
+    .action-stack{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+
+    .toolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .tools-left,
+    .tools-right{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .category-title{
+      font-size:22px;
+      font-weight:700;
+      color:#333;
+    }
+
+    /* Style for yellow parameter pills (matches screenshot exactly) */
+    .active-filters-box {
+      background: #f5f5f5;
+      padding: 16px;
+      border-radius: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      align-items: center;
+      margin-top: 10px;
+      width: 100%;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      color: #005f8c;
+      font-size: 13.5px;
+      font-weight: 500;
+      max-width: 250px;
+      white-space: normal;
+      word-wrap: break-word;
+      line-height: 1.3;
+      margin-top: 5px;
+    }
+
+    .filter-val {
+      background: #fff;
+      border: 1px solid #f2c94c; /* Yellow border */
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 13px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 300px;
+      white-space: normal;
+      word-wrap: break-word;
+    }
+
+    .filter-val.gray-border {
+      border-color: #d9e1e8;
+    }
+
+    .filter-x {
+      cursor: pointer;
+      color: #333;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .select{
+      padding:9px;
+      border:1px solid var(--line);
+      border-radius:4px;
+      background:#fff;
+      outline:0;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:290px 1fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    .filter-panel{
+      position:sticky;
+      top:82px;
+      max-height:calc(100vh - 96px);
+      overflow:auto;
+    }
+
+    .filter-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:13px;
+      border-bottom:1px solid var(--line);
+      background:#f8fafc;
+      border-radius:8px 8px 0 0;
+    }
+
+    .filter-title b{color:var(--dark)}
+
+    .clear-btn{
+      border:0;
+      background:transparent;
+      color:var(--blue);
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .filter-block{
+      border-bottom:1px solid #edf1f5;
+      padding:12px 13px;
+    }
+
+    .filter-block h4{
+      margin:0 0 8px;
+      color:#263746;
+      font-size:13px;
+    }
+
+    .filter-search,
+    .price-input{
+      width:100%;
+      padding:9px;
+      border:1px solid var(--line);
+      border-radius:4px;
+      outline:0;
+      margin-bottom:8px;
+    }
+
+    .check-list{
+      max-height:170px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .check-row{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+      padding:5px 0;
+      font-size:13px;
+      color:#34495e;
+    }
+
+    .check-row input{margin-top:2px}
+
+    .toggle-row{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .group-box{
+      margin-bottom:14px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .group-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:11px 13px;
+      background:#f8fafc;
+      border-bottom:1px solid var(--line);
+    }
+
+    .group-name{
+      font-weight:950;
+      color:var(--dark);
+    }
+
+    .group-sub{
+      margin-top:3px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .group-actions{
+      display:flex;
+      gap:7px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:16px;
+      padding:16px;
+      align-items:stretch;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid #d6dee6;
+      border-radius:8px;
+      overflow:hidden;
+      transition:.18s ease;
+      display:flex;
+      flex-direction:column;
+      min-height:455px;
+      position:relative;
+      box-shadow:0 1px 3px rgba(5,54,74,.04);
+    }
+
+    .card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 22px rgba(5,54,74,.12);
+      border-color:#a9cce8;
+    }
+
+    .card.selected{
+      border:2px solid var(--orange);
+      box-shadow:0 0 0 3px rgba(245,130,32,.15);
+    }
+
+    .image-box{
+      height:170px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-bottom:1px solid #eef2f6;
+      position:relative;
+      cursor:pointer;
+    }
+
+    .image-box img{
+      max-width:95%;
+      max-height:95%;
+      object-fit:contain;
+    }
+
+    .no-img{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#8492a0;
+      background:linear-gradient(135deg,#f6f8fb,#edf2f7);
+      font-weight:900;
+    }
+
+    .badge-stack{
+      position:absolute;
+      left:8px;
+      top:8px;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      max-width:92%;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 7px;
+      border-radius:4px;
+      font-size:11px;
+      font-weight:950;
+      background:var(--orange);
+      color:#fff;
+      width:max-content;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .badge.blue{
+      background:#eaf4ff;
+      color:#07598a;
+      border:1px solid #c7e2f7;
+    }
+
+    .badge.green{
+      background:var(--green);
+    }
+
+    .badge.red{
+      background:var(--danger);
+    }
+
+    .card-body{
+      padding:13px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      flex:1;
+    }
+
+    .title{
+      font-size:14px;
+      font-weight:900;
+      line-height:1.35;
+      min-height:57px;
+      max-height:57px;
+      overflow:hidden;
+      color:#006eb6;
+      cursor:pointer;
+    }
+
+    .meta{
+      font-size:12.5px;
+      color:#536475;
+      margin-top:5px;
+    }
+
+    .meta b{color:#263746}
+
+    .rating{
+      display:inline-block;
+      margin-top:7px;
+      background:var(--green);
+      color:#fff;
+      padding:4px 7px;
+      border-radius:4px;
+      font-size:12px;
+      font-weight:900;
+      width:max-content;
+    }
+
+    .price-zone{
+      border-top:1px dashed var(--line);
+      margin-top:auto;
+      padding-top:9px;
+      display:grid;
+      gap:4px;
+    }
+
+    .price{
+      font-size:20px;
+      font-weight:950;
+      color:#111;
+    }
+
+    .mrp{
+      font-size:12px;
+      color:#697989;
+    }
+
+    .discount{
+      font-size:12px;
+      font-weight:900;
+      color:var(--green);
+    }
+
+    .card-actions{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .card-actions button{
+      flex:1;
+      padding:8px 7px;
+      border-radius:4px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;
+      cursor:pointer;
+      color:var(--dark);
+    }
+
+    .card-actions .compare-btn{
+      background:var(--blue);
+      color:#fff;
+      border-color:var(--blue);
+    }
+
+    .pagination{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-top:14px;
+      padding:12px 14px;
+      flex-wrap:wrap;
+    }
+
+    .page-buttons{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+
+    .page-btn{
+      border:1px solid var(--blue);
+      background:#fff;
+      color:var(--blue);
+      border-radius:4px;
+      padding:7px 10px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .page-btn.active{
+      background:var(--blue);
+      color:#fff;
+    }
+
+    .page-btn:disabled{
+      border-color:#c7d1da;
+      color:#93a0ab;
+      background:#f6f8fa;
+      cursor:not-allowed;
+    }
+
+    /* Floating Full-Page Slider for Comparison */
+    .compare-slider{
+      position:fixed;
+      right:-100vw;
+      top:0;
+      width:100vw;
+      max-width:100vw;
+      height:100vh;
+      background:#fff;
+      box-shadow:-5px 0 25px rgba(0,0,0,0.15);
+      z-index:150;
+      transition:right 0.35s ease;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .compare-slider.open{
+      right:0;
+    }
+
+    .compare-head{
+      padding:16px 20px;
+      background:var(--dark);
+      color:#fff;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .compare-head b{
+      font-size:18px;
+    }
+
+    .close-btn-white{
+      background:#fff;
+      color:var(--dark);
+      border:0;
+      padding:8px 16px;
+      font-weight:900;
+      border-radius:4px;
+      cursor:pointer;
+      font-size:14px;
+    }
+
+    .compare-controls{
+      padding:12px 20px;
+      border-bottom:1px solid var(--line);
+      background:#f8fafc;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .compare-controls button{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--dark);
+      border-radius:4px;
+      padding:8px 16px;
+      font-weight:900;
+      cursor:pointer;
+      font-size:14px;
+    }
+
+    .compare-controls button.active-btn{
+      background:var(--blue);
+      color:#fff;
+      border-color:var(--blue);
+    }
+
+    .compare-table-wrap{
+      flex:1;
+      overflow:auto;
+      position:relative;
+    }
+
+    .compare-table{
+      border-collapse:separate;
+      border-spacing:0;
+    }
+
+    .compare-table th,
+    .compare-table td{
+      border-bottom:1px solid #edf1f5;
+      border-right:1px solid #edf1f5;
+      padding:16px 12px;
+      vertical-align:top;
+      font-size:14px;
+      word-wrap:break-word;
+    }
+    
+    .compare-table thead th{
+      position:sticky;
+      top:0;
+      background:#fff;
+      z-index:10;
+      border-bottom:2px solid var(--line);
+    }
+
+    .compare-table th.param-col{
+      width:220px;
+      min-width:220px;
+      max-width:220px;
+      background:#f8fafc;
+      color:#425466;
+      text-align:left;
+      position:sticky;
+      left:0;
+      z-index:11;
+      border-right:2px solid var(--line);
+    }
+    
+    .compare-table thead th.param-col{
+      z-index:12; 
+    }
+
+    .compare-product{
+      width:320px;
+      min-width:320px;
+      max-width:320px;
+      font-weight:900;
+      color:var(--dark);
+      text-align:center;
+      position:relative;
+    }
+
+    .diff-cell{
+      background:var(--diff);
+    }
+
+    .best-cell{
+      font-weight:900;
+      color:var(--green);
+    }
+
+    .remove-x{
+      border:0;
+      background:#fff1f0;
+      color:var(--danger);
+      border-radius:4px;
+      padding:4px 10px;
+      font-weight:900;
+      cursor:pointer;
+      position:absolute;
+      top:12px;
+      right:12px;
+    }
+
+    .mini-img{
+      height:60px;
+      object-fit:contain;
+      display:block;
+      margin:10px auto;
+    }
+
+    .rank-badge{
+      display:inline-block;
+      padding:6px 14px;
+      border-radius:20px;
+      font-weight:950;
+      color:#fff;
+      font-size:15px;
+      margin-bottom:10px;
+      box-shadow:0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .rank-L1{ background:var(--l1-green); }
+    .rank-L2{ background:var(--l2-yellow); color:#111; }
+    .rank-L3{ background:var(--l3-orange); }
+    .rank-Other{ background:#7a8a99; }
+
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.62);
+      z-index:200;
+      padding:18px;
+    }
+
+    .modal-card{
+      background:#fff;
+      max-width:1120px;
+      margin:auto;
+      border-radius:8px;
+      max-height:92vh;
+      overflow:auto;
+    }
+
+    .modal-head{
+      position:sticky;
+      top:0;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px 18px;
+      z-index:2;
+    }
+
+    .modal-head b{color:var(--dark)}
+
+    .close{
+      font-size:28px;
+      font-weight:900;
+      cursor:pointer;
+      color:#536475;
+    }
+
+    .modal-body{padding:20px}
+
+    .product-top{
+      display:grid;
+      grid-template-columns:350px 1fr;
+      gap:22px;
+    }
+
+    .modal-img{
+      height:330px;
+      border:1px solid var(--line);
+      border-radius:6px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+    }
+
+    .modal-img img{
+      max-width:95%;
+      max-height:95%;
+      object-fit:contain;
+    }
+
+    .modal-info h2{
+      margin:0 0 12px;
+      font-size:21px;
+      line-height:1.35;
+      color:#172635;
+    }
+
+    .price-box{
+      border-left:5px solid var(--blue);
+      background:#f8fbff;
+      padding:13px;
+      margin-bottom:14px;
+    }
+
+    .modal-price{
+      font-size:29px;
+      font-weight:950;
+    }
+
+    .info-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin:14px 0;
+    }
+
+    .info-cell{
+      border:1px solid var(--line);
+      border-radius:5px;
+      padding:10px;
+      background:#fff;
+    }
+
+    .info-cell span{
+      display:block;
+      font-size:12px;
+      color:#697989;
+    }
+
+    .info-cell b{font-size:14px}
+
+    .gem-link{
+      display:inline-block;
+      background:var(--blue);
+      color:#fff;
+      text-decoration:none;
+      border-radius:4px;
+      padding:11px 16px;
+      font-weight:900;
+    }
+
+    .spec-title{
+      margin-top:22px;
+      background:var(--dark);
+      color:#fff;
+      padding:12px 14px;
+      border-radius:6px 6px 0 0;
+      font-weight:900;
+    }
+
+    .spec-table{
+      width:100%;
+      border-collapse:collapse;
+      border:1px solid var(--line);
+    }
+
+    .spec-table th,
+    .spec-table td{
+      text-align:left;
+      padding:10px;
+      border-bottom:1px solid var(--line);
+      font-size:13px;
+      vertical-align:top;
+    }
+
+    .spec-table th{
+      width:34%;
+      background:#f8fafc;
+      color:#455869;
+    }
+
+    .mobile-filter-btn{
+      display:none;
+    }
+
+    .hidden{display:none!important}
+    
+    .slider-overlay {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.5);
+      z-index:140;
+      display:none;
+    }
+    .slider-overlay.open {
+      display:block;
+    }
+
+    /* Chatbot CSS */
+    .chat-widget {
+      position: fixed;
+      bottom: 0;
+      right: 20px;
+      width: 340px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      height: 48px;
+      overflow: hidden;
+    }
+    .chat-widget.open {
+      height: 480px;
+    }
+    .chat-header {
+      background: linear-gradient(135deg, var(--blue), #005f8c);
+      color: #fff;
+      padding: 14px 18px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+    }
+    .chat-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background: #f4f7f9;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chat-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      word-wrap: break-word;
+    }
+    .user-msg {
+      align-self: flex-end;
+      background: var(--blue);
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
+    .ai-msg {
+      align-self: flex-start;
+      background: #fff;
+      color: #333;
+      border-bottom-left-radius: 2px;
+      border: 1px solid #e1e7ec;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .chat-input-area {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+    .chat-input-area input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #c7d1da;
+      border-radius: 20px;
+      outline: none;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .chat-input-area input:focus {
+      border-color: var(--blue);
+    }
+    .chat-input-area button {
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 0 16px;
+      margin-left: 8px;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+    .chat-input-area button:hover {
+      opacity: 0.9;
+    }
+
+
+    @media(max-width:1280px){
+      .grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+    }
+
+    @media(max-width:900px){
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+
+    @media(max-width:560px){
+      .grid{grid-template-columns:1fr;}
+      .card{min-height:auto;}
+    }
+
+    @media(max-width:1180px){
+      .layout{
+        grid-template-columns:280px 1fr;
+      }
+    }
+
+    @media(max-width:900px){
+      .topbar-inner{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .logo{text-align:center}
+
+      .hero{display:block}
+
+      .layout{
+        grid-template-columns:1fr;
+      }
+
+      .filter-panel{
+        position:fixed;
+        inset:0;
+        z-index:100;
+        border-radius:0;
+        max-height:none;
+        display:none;
+      }
+
+      .filter-panel.open{
+        display:block;
+      }
+
+      .mobile-filter-btn{
+        display:inline-block;
+      }
+
+      .product-top{
+        grid-template-columns:1fr;
+      }
+
+      .modal-img{height:260px}
+
+      .info-grid{
+        grid-template-columns:1fr;
+      }
+
+      .sync-btn{width:100%}
+    }
+  
+
+    /* =========================================================
+       UI FINAL SPACE + CARD VISIBILITY FIX
+       Purpose: remove blank area above category cards and stop cards
+       from getting hidden/cut. No data/API/business logic changed.
+       ========================================================= */
+
+    html, body{
+      height:auto;
+      min-height:100%;
+      overflow-x:hidden;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+
+    .topbar-inner{
+      padding:8px 16px;
+      min-height:58px;
+    }
+
+    .global-search input{
+      padding:11px 14px;
+    }
+
+    .sync-btn{
+      height:40px;
+    }
+
+    .wrap{
+      padding:6px 14px 50px !important;
+    }
+
+    .hero,
+    #loader.hidden,
+    #loader[style*="display: none"]{
+      display:none !important;
+      height:0 !important;
+      min-height:0 !important;
+      max-height:0 !important;
+      padding:0 !important;
+      margin:0 !important;
+      border:0 !important;
+      overflow:hidden !important;
+      box-shadow:none !important;
+    }
+
+    #categoryView{
+      margin:0 !important;
+      padding:0 !important;
+    }
+
+    .gem-category-shell{
+      margin-top:0 !important;
+      border-radius:6px;
+      overflow:visible !important;
+    }
+
+    .gem-category-toolbar{
+      position:relative !important;
+      top:auto !important;
+      min-height:48px !important;
+      padding:7px 22px !important;
+      margin:0 !important;
+      z-index:10;
+    }
+
+    .gem-card-area{
+      padding:12px 23px 20px !important;
+      margin:0 !important;
+    }
+
+    .category-grid{
+      gap:16px !important;
+      align-items:stretch;
+    }
+
+    .category-card{
+      height:auto !important;
+      min-height:176px !important;
+      padding:16px 18px 14px !important;
+      overflow:visible !important;
+    }
+
+    .category-card-top{
+      min-height:58px !important;
+    }
+
+    .category-card-name{
+      max-height:none !important;
+      min-height:40px !important;
+      -webkit-line-clamp:2;
+    }
+
+    .category-card-count{
+      margin-top:5px !important;
+    }
+
+    .category-card-mid{
+      margin-top:10px !important;
+    }
+
+    .category-card-updated{
+      margin-top:12px !important;
+      white-space:normal !important;
+    }
+
+    .gem-pagination{
+      margin-top:8px !important;
+    }
+
+    /* Product cards: keep price and action buttons visible */
+    .grid{
+      align-items:stretch;
+    }
+
+    .card{
+      height:auto !important;
+      min-height:520px !important;
+      overflow:visible !important;
+    }
+
+    .card-body{
+      min-height:340px;
+      overflow:visible !important;
+    }
+
+    .title{
+      min-height:58px !important;
+      max-height:none !important;
+      -webkit-line-clamp:3;
+    }
+
+    .price-zone{
+      margin-top:auto !important;
+      padding-bottom:2px;
+    }
+
+    .card-actions{
+      flex-shrink:0;
+    }
+
+    @media(max-width:900px){
+      .gem-category-toolbar{
+        position:relative !important;
+        top:auto !important;
+        min-height:unset !important;
+        padding:10px 14px !important;
+      }
+      .gem-card-area{padding:10px 14px 16px !important;}
+      .category-card{min-height:172px !important;}
+      .card{min-height:auto !important;}
+      .card-body{min-height:auto;}
+    }
+
+  
+    .vs-board { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+    .vs-card { flex: 1; min-width:300px; background: #fff; border: 2px solid var(--line); border-radius: 8px; padding: 20px; text-align: center; position: relative; }
+    .vs-card.me { border-color: var(--blue); }
+    .vs-card.l1 { border-color: var(--danger); }
+    .vs-card.win { border-color: var(--l1-green); background: var(--best); }
+    .vs-card h3 { margin-top:0; color: var(--muted); font-size:14px; text-transform:uppercase; letter-spacing:1px; }
+    .vs-price { font-size: 32px; font-weight: 900; margin: 15px 0; color: var(--text); }
+    .vs-title { font-size: 14px; line-height:1.4; margin-bottom: 15px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .vs-badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background: var(--dark); color:#fff; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:bold; white-space:nowrap; }
+    .tracker-row { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee; align-items:center; }
+    .tracker-row:last-child { border:0; }
+
+  </style>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+      <div class="logo" style="display:flex; align-items:center; gap: 15px; text-align: left;">
+        <button id="topbarBackBtn" class="back-btn hidden" onclick="backToCategories()" style="padding: 6px 12px; font-size: 13px; box-shadow: none;">← Back</button>
+        <div>
+         LowestBid AI<br>
+          <small>Advanced GeM Comparison Portal</small>
+        </div>
+      </div>
+
+      <div class="global-search">
+        <input id="globalSearch" placeholder="Search category, product, brand, product ID, size, MRP, specification">
+        <button onclick="runSearchNow()">Search</button>
+      </div>
+
+      <button class="sync-btn" style="background:var(--green);" onclick="openTrackerMode()">L1 Tracker</button>
+        <button class="sync-btn" onclick="syncData()">Sync Data</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    
+      <section id="trackerView" class="hidden">
+        <div class="panel" style="margin-bottom:20px;">
+          <h2>L1 Competitor Tracker (Head-to-Head)</h2>
+          <p style="color:var(--muted)">Enter your Product ID. The system will lock the exact specifications and monitor the market to alert you if someone undercuts your price.</p>
+          <div style="display:flex; gap:10px; margin-top:15px;">
+            <input type="text" id="trackProductIdInput" placeholder="Enter Product ID" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:4px; font-size:15px;">
+            <input type="email" id="trackClientEmail" placeholder="Client's Email ID (For Alerts)" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:4px; font-size:15px;">
+            <button onclick="startTracking()" class="primary-btn" style="border-radius:4px;">Lock & Track</button>
+          </div>
+        </div>
+        
+        <div id="trackerResults"></div>
+        
+        <div class="panel mt-3">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>Currently Tracked Products (Auto 24/7 Monitoring)</h3>
+            <button class="primary-btn" style="padding:6px 12px; font-size:13px;" onclick="loadTrackedProducts()">Refresh List</button>
+          </div>
+          <div id="trackedList" style="margin-top:15px; border:1px solid var(--line); border-radius:4px;"></div>
+        </div>
+      </section>
+
+      <section class="hero">
+      <div>
+        <h1>Advanced GeM Style Product Comparison</h1>
+        <p>Same-size grouping, Top 3 by lowest MRP, full-page sliding comparison, Auto L1 Ranking, and active filter pills.</p>
+      </div>
+      <div class="pill status-pill" id="dataMode">Live / Mock Ready</div>
+    </section>
+
+    <div id="loader" class="panel loader">Loading categories...</div>
+
+    <section id="categoryView" class="hidden">
+      <div class="gem-category-shell panel">
+        <div class="gem-category-toolbar">
+          <div class="gem-toolbar-left">
+            <h2>Categories</h2>
+            <button class="gem-reset-btn" onclick="resetCategoryFilters()">⌂ Reset</button>
+          </div>
+
+          <div class="gem-toolbar-right">
+            <span class="gem-sort-label">Sort by</span>
+            <select class="gem-sort-select" id="categoryProductSort" onchange="renderCategoryPage()">
+              <option value="PRODUCTS_ASC">Products: Low to High</option>
+              <option value="PRODUCTS_DESC">Products: High to Low</option>
+            </select>
+            <select class="gem-sort-select" id="categoryNameSort" onchange="renderCategoryPage()">
+              <option value="NAME_ASC">Name: A-Z</option>
+              <option value="NAME_DESC">Name: Z-A</option>
+            </select>
+            <select class="gem-sort-select" id="categoryUpdatedSort" onchange="renderCategoryPage()">
+              <option value="UPDATED_ASC">Last Updated: Low → High</option>
+              <option value="UPDATED_DESC">Last Updated: High → Low</option>
+            </select>
+            <div class="gem-count" id="categoryCount"></div>
+          </div>
+        </div>
+
+        <div class="gem-card-area">
+          <div id="categoryGrid" class="category-grid"></div>
+        </div>
+      </div>
+
+      <div class="panel pagination gem-pagination">
+        <div id="categoryPageInfo" class="muted"></div>
+        <div id="categoryPages" class="page-buttons"></div>
+      </div>
+    </section>
+
+    <section id="productView" class="hidden">
+      <div class="toolbar" style="margin-bottom: 8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; width: 100%; flex-wrap: wrap; gap: 10px;">
+          <span class="category-title" id="categoryTitle" style="font-size: 18px; margin: 0;"></span>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap: wrap;">
+            <button class="small-btn mobile-filter-btn" onclick="toggleFilters(true)">Filters</button>
+            <div id="activeFiltersContainer"></div>
+          </div>
+        </div>
+
+        <div class="tools-right" style="margin-top:10px;">
+          <span class="muted" id="productCount"></span>
+          <select class="select" id="sortSelect" onchange="applyFilters()">
+            <option value="DEFAULT">Default Ranking</option>
+            <option value="MRP_ASC">MRP Low to High</option>
+            <option value="MRP_DESC">MRP High to Low</option>
+            <option value="PRICE_ASC">Price Low to High</option>
+            <option value="PRICE_DESC">Price High to Low</option>
+            <option value="SELLER_DESC">Seller Excellence High to Low</option>
+            <option value="STOCK_DESC">Stock High to Low</option>
+          </select>
+          <button class="export-btn" onclick="exportCurrentCategoryJson()">Export JSON</button>
+          <button class="action-btn" style="background:var(--orange); color:#fff; border-color:var(--orange);" onclick="toggleComparePanel(true)">View Compare (<span id="compareBtnCount">0</span>)</button>
+        </div>
+      </div>
+
+      <div class="layout">
+        <aside class="panel filter-panel" id="filterPanel"></aside>
+
+        <div>
+          <div id="groupContainer"></div>
+
+          <div class="panel pagination">
+            <div id="productPageInfo" class="muted"></div>
+            <div id="productPages" class="page-buttons"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="slider-overlay" id="sliderOverlay" onclick="toggleComparePanel(false)"></div>
+  <aside class="compare-slider" id="compareSlider">
+    <!-- Slider Content rendered dynamically -->
+  </aside>
+
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <b>Product Details</b>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  
+  
+  </div>
+
+  <script>
+    // Configuration
+    const GAS_API_URL = "https://sash-publisher-demeaning.ngrok-free.dev"; // Local API Database
+    const CACHE_MINUTES = 5;
+
+    // --- GitHub Pages Compatibility Layer ---
+    if (typeof google === "undefined" || !google.script) {
+      window.google = window.google || {};
+      google.script = google.script || {};
+      
+      function executeApiCall(action, payload, onSuccess, onFailure) {
+        fetch(GAS_API_URL + '/' + action, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 
+            'Content-Type': 'application/json;charset=utf-8',
+            'ngrok-skip-browser-warning': 'true'
+          }
+        })
+        .then(res => res.json())
+        .then(data => onSuccess && onSuccess(data))
+        .catch(err => onFailure ? onFailure(err) : console.error(err));
+      }
+
+      function createApiProxy(onSuccess, onFailure) {
+        return {
+          getCategoriesList: () => executeApiCall('getCategoriesList', {}, onSuccess, onFailure),
+          getCategoryProducts: (cat) => executeApiCall('getCategoryProducts', {categoryName: cat}, onSuccess, onFailure),
+          requestL1Update: (url, cat) => executeApiCall('requestL1Update', {url: url, category: cat}, onSuccess, onFailure),
+          exportProductsJson: (data) => executeApiCall('exportProductsJson', data, onSuccess, onFailure),
+          getCategoryCountsBatch: (names) => executeApiCall('getCategoryCountsBatch', {names: names}, onSuccess, onFailure),
+          forceRefreshCache: () => executeApiCall('forceRefreshCache', {}, onSuccess, onFailure)
+        };
+      }
+
+      google.script.run = {
+        withSuccessHandler: function(onSuccess) {
+          return {
+            withFailureHandler: function(onFailure) {
+              return createApiProxy(onSuccess, onFailure);
+            },
+            ...createApiProxy(onSuccess, console.error)
+          };
+        },
+        withFailureHandler: function(onFailure) {
+          return {
+            withSuccessHandler: function(onSuccess) {
+              return createApiProxy(onSuccess, onFailure);
+            },
+            ...createApiProxy(console.log, onFailure)
+          };
+        },
+        ...createApiProxy(console.log, console.error)
+      };
+    }
+    // ----------------------------------------
+
+    const CATEGORY_PAGE_SIZE = 50;
+    const GROUP_PAGE_SIZE = 8;
+    const TOP_LIMIT = 3;
+    const MAX_COMPARE = 10;
+
+    const MONEY_INF = Number.POSITIVE_INFINITY;
+
+    let categories = [];
+    let categoryFiltered = [];
+    let categoryPage = 1;
+
+    let currentView = "categories";
+    let currentCategory = "";
+    let rawProducts = [];
+    let products = [];
+    let filteredProducts = [];
+    let productGroups = [];
+    let visibleGroups = [];
+    let groupPage = 1;
+
+    let selectedMap = {};
+    let filterOptions = {};
+    let searchTimer;
+    let requestToken = 0;
+
+    let filterState = {
+      values:{},
+      minPrice:"",
+      maxPrice:"",
+      minMrp:"",
+      maxMrp:"",
+      top3Only:false,
+      hideWeak:true,
+      showDifferencesOnly:false,
+      hideSameSpecs:false
+    };
+
+    const IMPORTANT_FILTER_KEYS = [
+      "brand",
+      "group_label",
+      "family",
+      "capacity_l",
+      "thickness_mm",
+      "width_mm",
+      "length_mm",
+      "diameter_mm",
+      "depth_mm",
+      "height_mm",
+      "pack_size",
+      "standard",
+      "material",
+      "grade",
+      "type",
+      "seller",
+      "stock_state"
+    ];
+
+    const LABELS = {
+      brand:"Brand",
+      group_label:"Same Size / Group",
+      family:"Product Family",
+      capacity_l:"Capacity",
+      thickness_mm:"Thickness",
+      width_mm:"Width",
+      length_mm:"Length",
+      diameter_mm:"Diameter",
+      depth_mm:"Depth",
+      height_mm:"Height",
+      pack_size:"Pack Size",
+      standard:"Standard / Specification",
+      material:"Material",
+      grade:"Grade",
+      type:"Type",
+      seller:"Seller",
+      stock_state:"Stock"
+    };
+
+    const MOCK_PRODUCTS = [
+      {
+        "category":"Aluminium Container",
+        "product_url":"https://mkp.gem.gov.in/",
+        "title":"Aluminium Container 20 Litres IS 9445",
+        "price":"₹1,200.00",
+        "mrp":"₹1,500.00",
+        "discount":"20%",
+        "brand":"ABC",
+        "product_id":"5116877-90470935721",
+        "stock":"700 In Stock",
+        "seller_excellence":"4.5 - 5.0",
+        "image_url":"NA",
+        "seller":"Resellers",
+        "all_specifications_and_details":{
+          "Capacity":"20 Litres",
+          "Conforming to Specification":"IS 9445",
+          "Material":"Aluminium"
+        }
+      },
+      {
+        "category":"Aluminium Container",
+        "product_url":"https://mkp.gem.gov.in/",
+        "title":"Aluminium Container 20 Ltr",
+        "price":"₹1,110.00",
+        "mrp":"₹1,350.00",
+        "discount":"18%",
+        "brand":"XYZ",
+        "product_id":"5116877-11111111111",
+        "stock":"In Stock",
+        "seller_excellence":"4.0 - 4.5",
+        "image_url":"NA",
+        "seller":"OEM Seller",
+        "all_specifications_and_details":{
+          "Capacity":"20 Ltr",
+          "Conforming to Specification":"IS 9445",
+          "Material":"Aluminium"
+        }
+      },
+      {
+        "category":"Aluminium Container",
+        "product_url":"https://mkp.gem.gov.in/",
+        "title":"Aluminium Container 5 Litres",
+        "price":"₹420.00",
+        "mrp":"₹600.00",
+        "discount":"30%",
+        "brand":"ABC",
+        "product_id":"5116877-22222222222",
+        "stock":"200 In Stock",
+        "seller_excellence":"3.5 - 4.0",
+        "image_url":"NA",
+        "seller":"Resellers",
+        "all_specifications_and_details":{
+          "Capacity":"5 Litres",
+          "Conforming to Specification":"IS 9445",
+          "Material":"Aluminium"
+        }
+      }
+    ];
+
+    window.onload = function(){
+      bindSearch();
+      fetchCategories();
+      renderSliderPanel();
+    };
+
+    function hasGas(){
+      return typeof google !== "undefined" && google.script && google.script.run;
+    }
+
+    function fetchCategories(){
+      showLoader("Loading categories...");
+
+      if(hasGas()){
+        google.script.run
+          .withSuccessHandler(function(data){
+            if(data && data.error) return showLoader("Folder Error: " + data.error);
+            categories = Array.isArray(data) ? data : [];
+            finishCategoryLoad();
+          })
+          .withFailureHandler(function(err){
+            showLoader("Script Error: " + err.message);
+          })
+          .getCategoriesList();
+      } else {
+        document.getElementById("dataMode").textContent = "Mock Data Mode";
+        categories = [...new Set(MOCK_PRODUCTS.map(p => p.category))].sort().map(function(name){ return { name:name, fileName:name.replace(/\s+/g, "_") + ".json", productCount:MOCK_PRODUCTS.filter(function(p){return p.category===name;}).length, updated:"09.05.2026 · 17:59" }; });
+        finishCategoryLoad();
+      }
+    }
+
+    function finishCategoryLoad(){
+      categories = normalizeCategoryList(categories);
+      categoryFiltered = [...categories];
+      categoryPage = 1;
+      currentView = "categories";
+      renderCategoryPage();
+    }
+
+    function normalizeCategoryList(list){
+      return (list || []).map(function(item){
+        if(item && typeof item === "object"){
+          const name = item.name || item.category || item.categoryName || item.category_name || item.title || item.displayName || item.display_name || item.fileName || item.filename || item.file_name || "Untitled Category";
+          return {
+            name:String(name).replace(/\.json$/i, '').replace(/_/g, ' ').replace(/\s+/g, ' ').trim(),
+            fileName:item.fileName || item.filename || item.file_name || item.file || item.jsonFile || item.json_file || "",
+            productCount:Number(item.productCount || item.product_count || item.products || item.productTotal || item.product_total || item.count || item.totalProducts || item.total_products || item.total || 0),
+            updated:item.updated || item.lastUpdated || item.last_updated || item.modified || item.modifiedAt || item.modified_at || "09.05.2026 · 17:59"
+          };
+        }
+        return {
+          name:String(item || "Untitled Category").replace(/\.json$/i, '').replace(/_/g, ' '),
+          fileName:"",
+          productCount:0,
+          updated:"09.05.2026 · 17:59"
+        };
+      });
+    }
+
+    function getCategoryName(cat){
+      if(cat && typeof cat === "object") return cat.name || cat.category || cat.categoryName || cat.category_name || cat.title || cat.displayName || cat.display_name || cat.fileName || cat.filename || cat.file_name || "Untitled Category";
+      return String(cat || "Untitled Category");
+    }
+
+    function getCategoryProductCount(cat){
+      const n = Number(cat && typeof cat === "object" ? (cat.productCount || cat.products || cat.count || cat.totalProducts || cat.total || 0) : 0);
+      return isNaN(n) || n <= 0 ? 0 : n;
+    }
+
+    function getCategoryUpdated(cat){
+      return (cat && typeof cat === "object" && cat.updated) ? cat.updated : "09.05.2026 · 17:59";
+    }
+
+    function resetCategoryFilters(){
+      document.getElementById("globalSearch").value = "";
+      const ps = document.getElementById("categoryProductSort");
+      const ns = document.getElementById("categoryNameSort");
+      const us = document.getElementById("categoryUpdatedSort");
+      if(ps) ps.value = "PRODUCTS_ASC";
+      if(ns) ns.value = "NAME_ASC";
+      if(us) us.value = "UPDATED_ASC";
+      categoryPage = 1;
+      renderCategoryPage();
+    }
+
+    function sortCategoryList(list){
+      const productSort = document.getElementById("categoryProductSort")?.value || "PRODUCTS_ASC";
+      const nameSort = document.getElementById("categoryNameSort")?.value || "NAME_ASC";
+      const updatedSort = document.getElementById("categoryUpdatedSort")?.value || "UPDATED_ASC";
+      const out = [...list];
+
+      out.sort(function(a,b){
+        let c = 0;
+        if(productSort === "PRODUCTS_ASC") c = getCategoryProductCount(a) - getCategoryProductCount(b);
+        if(productSort === "PRODUCTS_DESC") c = getCategoryProductCount(b) - getCategoryProductCount(a);
+        if(c) return c;
+
+        c = getCategoryName(a).localeCompare(getCategoryName(b), undefined, {numeric:true, sensitivity:"base"});
+        if(nameSort === "NAME_DESC") c = -c;
+        if(c) return c;
+
+        c = String(getCategoryUpdated(a)).localeCompare(String(getCategoryUpdated(b)), undefined, {numeric:true, sensitivity:"base"});
+        if(updatedSort === "UPDATED_DESC") c = -c;
+        return c;
+      });
+      return out;
+    }
+
+    function renderCategoryPage(){
+      hideLoader();
+      showOnly("categoryView");
+
+      const term = getSearchTerm();
+      const filtered = categories.filter(c => !term || getCategoryName(c).toLowerCase().includes(term));
+      categoryFiltered = sortCategoryList(filtered);
+
+      const totalPages = Math.max(1, Math.ceil(categoryFiltered.length / CATEGORY_PAGE_SIZE));
+      categoryPage = Math.min(categoryPage, totalPages);
+
+      const start = (categoryPage - 1) * CATEGORY_PAGE_SIZE;
+      const rows = categoryFiltered.slice(start, start + CATEGORY_PAGE_SIZE);
+      const shownStart = categoryFiltered.length ? start + 1 : 0;
+      const shownEnd = Math.min(start + rows.length, categoryFiltered.length);
+
+      document.getElementById("categoryCount").textContent = `Showing ${shownStart}–${shownEnd} of ${categoryFiltered.length.toLocaleString('en-IN')} categories`;
+
+      const grid = document.getElementById("categoryGrid");
+      grid.innerHTML = rows.length ? rows.map(function(cat){
+        const name = getCategoryName(cat);
+        const count = getCategoryProductCount(cat);
+        const countText = count ? count.toLocaleString('en-IN') + " products" : "Loading products...";
+        return `
+          <article class="category-card">
+            <div class="category-card-top">
+              <div class="category-card-name" title="${esc(name)}" onclick="openCategory('${jsAttr(name)}','${jsAttr(cat.fileName || '')}')">${esc(name)}</div>
+              <div class="category-card-count" data-category-count="${esc(name)}">${esc(countText)}</div>
+            </div>
+            <div class="category-card-mid">
+              <span class="gem-ready-pill">Ready</span>
+              <button class="gem-view-btn" onclick="openCategory('${jsAttr(name)}','${jsAttr(cat.fileName || '')}')">View Products</button>
+            </div>
+            <div class="category-card-updated">Updated ${esc(getCategoryUpdated(cat))}</div>
+          </article>
+        `;
+      }).join("") : `<div class="panel loader" style="grid-column:1/-1;">No category found.</div>`;
+
+      hydrateVisibleCategoryCounts(rows);
+
+      document.getElementById("categoryPageInfo").textContent = `Page ${categoryPage} of ${totalPages}`;
+      renderPager("categoryPages", categoryPage, totalPages, p => {
+        categoryPage = p;
+        renderCategoryPage();
+      });
+    }
+
+    function hydrateVisibleCategoryCounts(rows){
+      if(!hasGas()) return;
+      const needs = (rows || []).filter(function(cat){ return !getCategoryProductCount(cat); });
+      if(!needs.length) return;
+
+      google.script.run
+        .withSuccessHandler(function(res){
+          const counts = res && res.counts ? res.counts : {};
+          Object.keys(counts).forEach(function(name){
+            const nodes = document.querySelectorAll('[data-category-count="' + cssAttr(name) + '"]');
+            nodes.forEach(function(node){
+              const n = Number(counts[name] || 0);
+              node.textContent = n.toLocaleString('en-IN') + ' products';
+            });
+          });
+        })
+        .withFailureHandler(function(){})
+        .getCategoryCountsBatch(needs.map(function(cat){
+          return { name:getCategoryName(cat), fileName:cat.fileName || '' };
+        }));
+    }
+
+    function cssAttr(v){
+      return String(v).replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+    }
+
+    function openCategory(category, fileName){
+      currentView = "products";
+      currentCategory = category;
+      groupPage = 1;
+      selectedMap = {};
+      filterState = {
+        values:{},
+        minPrice:"",
+        maxPrice:"",
+        minMrp:"",
+        maxMrp:"",
+        top3Only:false,
+        hideWeak:true,
+        showDifferencesOnly:false,
+        hideSameSpecs:false
+      };
+
+      document.getElementById("globalSearch").value = "";
+      document.getElementById("categoryTitle").textContent = category;
+      updateCompareBtnCount();
+
+      const token = ++requestToken;
+      showLoader("Loading products for " + category + "...");
+
+      if(hasGas()){
+        google.script.run
+          .withSuccessHandler(function(data){
+            if(token !== requestToken) return;
+            if(data && data.error) return showLoader("Data Error: " + data.error);
+
+            rawProducts = Array.isArray(data) ? data : [];
+            products = normalizeProducts(rawProducts);
+            buildFilterOptions();
+            renderFilterPanel();
+            applyFilters();
+            renderSliderPanel();
+
+            hideLoader();
+            showOnly("productView");
+          })
+          .withFailureHandler(function(err){
+            if(token !== requestToken) return;
+            showLoader("Script Error: " + err.message);
+          })
+          .getCategoryProducts(fileName || category);
+      } else {
+        rawProducts = MOCK_PRODUCTS.filter(p => p.category === category);
+        products = normalizeProducts(rawProducts);
+        buildFilterOptions();
+        renderFilterPanel();
+        applyFilters();
+        renderSliderPanel();
+
+        hideLoader();
+        showOnly("productView");
+      }
+    }
+
+    function normalizeProducts(list){
+      return list.map((p, index) => normalizeProduct(p, index));
+    }
+
+    function getSmartVal(obj, keywords) {
+      if (!obj || typeof obj !== 'object') return null;
+      for (const k in obj) {
+        const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (keywords.some(kw => cleanK.includes(kw))) {
+           const val = obj[k];
+           if (typeof val === 'string' || typeof val === 'number') return val;
+        }
+      }
+      return null;
+    }
+
+    function getSmartObj(obj, keywords) {
+      if (!obj || typeof obj !== 'object') return {};
+      for (const k in obj) {
+        const cleanK = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (keywords.some(kw => cleanK.includes(kw))) {
+           const val = obj[k];
+           if (typeof val === 'object' && val !== null && !Array.isArray(val)) return val;
+        }
+      }
+      return {};
+    }
+
+    function normalizeProduct(p, index){
+      p = p || {};
+      
+      const rawSpecs = p.all_specifications_and_details || p.specifications || p.specs || p.attributes || p.details || p.technical_specifications || getSmartObj(p, ['spec', 'detail', 'attribute', 'feature']);
+      const rawTitle = p.title || p.product_name || p.name || p.productName || getSmartVal(p, ['title', 'name', 'product']);
+      const rawPrice = p.price || p.offer_price || p.selling_price || p.current_price || getSmartVal(p, ['price', 'offer']);
+      const rawMrp = p.mrp || p.maximum_retail_price || p.original_price || getSmartVal(p, ['mrp', 'retail', 'original']);
+      const rawStock = p.stock || p.inventory || p.quantity || p.stock_status || getSmartVal(p, ['stock', 'qty', 'quantity']);
+      const rawBrand = p.brand || p.brand_name || p.manufacturer || getSmartVal(p, ['brand', 'make']);
+      const rawSeller = p.seller || p.vendor || p.seller_name || getSmartVal(p, ['seller', 'vendor']);
+      const rawImg = p.image_url || p.img_url || p.image || p.img || p.picture || p.thumbnail || getSmartVal(p, ['image', 'img', 'pic', 'thumb']);
+      const rawId = p.product_id || p.id || p.item_id || p.sku || getSmartVal(p, ['id', 'sku']);
+      const rawRating = p.seller_excellence || p.rating || p.score || getSmartVal(p, ['excellence', 'rating', 'score']);
+      const rawDiscount = p.discount || p.discount_percentage || getSmartVal(p, ['discount', 'off']);
+      const rawUrl = p.product_url || p.url || p.link || getSmartVal(p, ['url', 'link']);
+      
+      const title = safe(rawTitle || "Untitled Product");
+      const category = safe(p.category || currentCategory);
+
+      const normText = normalizeText([category, title, JSON.stringify(rawSpecs)].join(" "));
+      const family = detectFamily(normText);
+      const normalizedSpecs = normalizeSpecs(title, rawSpecs, family);
+
+      const priceValue = parseMoney(rawPrice);
+      const mrpValue = parseMoney(rawMrp);
+      const sellerScore = parseSellerScore(rawRating);
+      const stockQty = parseStockQty(rawStock);
+      const stockState = parseStockState(rawStock);
+
+      const groupKey = buildGroupKey(family, normalizedSpecs, title);
+      const groupLabel = buildGroupLabel(family, normalizedSpecs, groupKey);
+
+      const completeness = computeCompleteness({ price: rawPrice, mrp: rawMrp, seller: rawSeller, image_url: rawImg, product_id: rawId, seller_excellence: rawRating }, normalizedSpecs);
+      const hideReasons = getHideReasons({ price: rawPrice, mrp: rawMrp, seller: rawSeller, image_url: rawImg }, completeness, groupKey);
+
+      const searchBlob = normalizeText([
+        category,
+        title,
+        rawBrand,
+        rawId,
+        rawSeller,
+        rawPrice,
+        rawMrp,
+        groupLabel,
+        family,
+        JSON.stringify(rawSpecs)
+      ].join(" "));
+
+      return {
+        ...p,
+        _idx:index,
+        _stableIndex:index,
+        category,
+        title,
+        brand:safe(rawBrand),
+        seller:safe(rawSeller),
+        product_id:safe(rawId),
+        price:safe(rawPrice),
+        mrp:safe(rawMrp),
+        discount:safe(rawDiscount),
+        stock:safe(rawStock),
+        seller_excellence:safe(rawRating),
+        image_url:safe(rawImg),
+        product_url:safe(rawUrl),
+        raw_specs:rawSpecs,
+        normalized_specs:normalizedSpecs,
+        family,
+        group_key:groupKey,
+        group_label:groupLabel,
+        price_value:priceValue,
+        mrp_value:mrpValue,
+        seller_excellence_score:sellerScore,
+        stock_qty:stockQty,
+        stock_state:stockState,
+        completeness_score:completeness,
+        hide_reasons:hideReasons,
+        search_blob:searchBlob
+      };
+    }
+
+    function detectFamily(text){
+      if(/foil|roll|wrapping/.test(text)) return "Foil / Roll";
+      if(/sheet|plate|bar|rod|tube|section|extrusion/.test(text)) return "Sheet / Rod / Section";
+      if(/container|vessel|can|drum|bucket|liquid/.test(text)) return "Container / Vessel";
+      if(/utensil|kadhai|patila|dish|petridish|pan|cooker/.test(text)) return "Utensil";
+      if(/paint|primer|coating/.test(text)) return "Paint / Coating";
+      if(/chemical|suppressant|polyamine|additive/.test(text)) return "Chemical / Industrial Pack";
+      return "General";
+    }
+
+    function normalizeSpecs(title, specs, family){
+      const all = normalizeText(title + " " + JSON.stringify(specs || {}));
+      const out = {};
+
+      out.capacity_l = parseCapacityLitres(all);
+      out.thickness_mm = parseDimension(all, ["thickness","thick","thk"]);
+      out.width_mm = parseDimension(all, ["width","wd"]);
+      out.length_mm = parseDimension(all, ["length","len"]);
+      out.diameter_mm = parseDimension(all, ["diameter","dia"]);
+      out.depth_mm = parseDimension(all, ["depth"]);
+      out.height_mm = parseDimension(all, ["height"]);
+      out.nominal_no = parseNominalNo(all);
+      out.standard = parseStandard(all);
+      out.pack_size = parsePackSize(all);
+      out.material = parseMaterial(all);
+      out.grade = parseGrade(all);
+      out.type = parseType(specs);
+
+      Object.keys(out).forEach(k => {
+        if(out[k] === null || out[k] === undefined || out[k] === "") delete out[k];
+      });
+
+      return out;
+    }
+
+    function buildGroupKey(family, s, title){
+      if(family === "Container / Vessel"){
+        if(s.capacity_l) return `container|cap:${s.capacity_l}|std:${s.standard || "na"}`;
+      }
+
+      if(family === "Foil / Roll"){
+        const parts = [];
+        if(s.thickness_mm) parts.push("thk:" + s.thickness_mm);
+        if(s.width_mm) parts.push("w:" + s.width_mm);
+        if(s.length_mm) parts.push("l:" + s.length_mm);
+        if(parts.length) return "foil|" + parts.join("|");
+      }
+
+      if(family === "Sheet / Rod / Section"){
+        const parts = [];
+        if(s.thickness_mm) parts.push("thk:" + s.thickness_mm);
+        if(s.width_mm) parts.push("w:" + s.width_mm);
+        if(s.length_mm) parts.push("l:" + s.length_mm);
+        if(s.grade) parts.push("grade:" + s.grade);
+        if(parts.length) return "sheet|" + parts.join("|");
+      }
+
+      if(family === "Utensil"){
+        if(s.nominal_no) return `utensil|no:${s.nominal_no}`;
+        if(s.diameter_mm || s.capacity_l){
+          return `utensil|dia:${s.diameter_mm || "na"}|cap:${s.capacity_l || "na"}`;
+        }
+      }
+
+      if(family === "Paint / Coating" || family === "Chemical / Industrial Pack"){
+        if(s.pack_size || s.capacity_l || s.standard){
+          return `${family}|pack:${s.pack_size || s.capacity_l || "na"}|std:${s.standard || "na"}`;
+        }
+      }
+
+      const simpleSize = parseAnySimpleSize(normalizeText(title));
+      if(simpleSize) return `general|${simpleSize}`;
+
+      return "ungrouped|" + normalizeText(title).slice(0,60);
+    }
+
+    function buildGroupLabel(family, s, key){
+      const parts = [];
+
+      if(s.capacity_l) parts.push(formatNum(s.capacity_l) + " L");
+      if(s.thickness_mm) parts.push("Thk " + formatNum(s.thickness_mm) + " mm");
+      if(s.width_mm) parts.push("W " + formatNum(s.width_mm) + " mm");
+      if(s.length_mm) parts.push("L " + formatNum(s.length_mm) + " mm");
+      if(s.diameter_mm) parts.push("Dia " + formatNum(s.diameter_mm) + " mm");
+      if(s.nominal_no) parts.push("No. " + s.nominal_no);
+      if(s.standard) parts.push(s.standard);
+
+      if(parts.length) return family + " | " + parts.join(" | ");
+      if(key && key.indexOf("ungrouped") === 0) return "Ungrouped / Review";
+      return family;
+    }
+
+    function computeCompleteness(p, specs){
+      let score = 0;
+      if(isFinite(parseMoney(p.price))) score += 2;
+      if(isFinite(parseMoney(p.mrp))) score += 2;
+      if(isMeaningful(p.seller)) score += 1;
+      if(validImage(p.image_url)) score += 1;
+      if(isMeaningful(p.product_id)) score += 1;
+      if(isMeaningful(p.seller_excellence)) score += 1;
+      score += Math.min(4, Object.keys(specs || {}).length);
+      return score;
+    }
+
+    function getHideReasons(p, completeness, groupKey){
+      const reasons = [];
+      if(!isFinite(parseMoney(p.mrp))) reasons.push("MRP unavailable");
+      if(!isFinite(parseMoney(p.price))) reasons.push("Price unavailable");
+      if(!isMeaningful(p.seller)) reasons.push("Seller unavailable");
+      if(!validImage(p.image_url)) reasons.push("Image unavailable");
+      if(completeness < 4) reasons.push("Incomplete data");
+      if(groupKey && groupKey.indexOf("ungrouped") === 0) reasons.push("Weak size match");
+      return reasons;
+    }
+
+    function buildFilterOptions(){
+      filterOptions = {};
+
+      IMPORTANT_FILTER_KEYS.forEach(k => filterOptions[k] = new Set());
+
+      products.forEach(p => {
+        addOpt("brand", p.brand);
+        addOpt("group_label", p.group_label);
+        addOpt("family", p.family);
+        addOpt("seller", p.seller);
+        addOpt("stock_state", p.stock_state);
+
+        Object.keys(p.normalized_specs || {}).forEach(k => {
+          if(filterOptions[k]) addOpt(k, displaySpecValue(k, p.normalized_specs[k]));
+        });
+      });
+
+      Object.keys(filterOptions).forEach(k => {
+        filterOptions[k] = [...filterOptions[k]]
+          .filter(isMeaningful)
+          .sort(naturalSort);
+
+        if(!filterOptions[k].length) delete filterOptions[k];
+      });
+    }
+
+    function addOpt(key, value){
+      if(!filterOptions[key]) filterOptions[key] = new Set();
+      if(isMeaningful(value)) filterOptions[key].add(String(value));
+    }
+
+    function renderFilterPanel(){
+      const panel = document.getElementById("filterPanel");
+
+      let html = `
+        <div class="filter-title">
+          <b>Advanced Filters</b>
+          <button class="clear-btn" onclick="clearAllFilters()">Clear All</button>
+        </div>
+
+        <div class="filter-block">
+          <label class="toggle-row">
+            <input type="checkbox" ${filterState.top3Only ? "checked" : ""} onchange="filterState.top3Only=this.checked;applyFilters();">
+            <span><b>Top 3 by lowest MRP</b><br><span class="muted">Show exactly top 3 lowest MRP in each group</span></span>
+          </label>
+        </div>
+
+        <div class="filter-block">
+          <label class="toggle-row">
+            <input type="checkbox" ${filterState.hideWeak ? "checked" : ""} onchange="filterState.hideWeak=this.checked;applyFilters();">
+            <span><b>Hide weak products</b><br><span class="muted">Push incomplete products lower</span></span>
+          </label>
+        </div>
+
+        <div class="filter-block">
+          <h4>Price Range</h4>
+          <input class="price-input" id="minPrice" placeholder="Min Price" value="${esc(filterState.minPrice)}" oninput="priceChanged()">
+          <input class="price-input" id="maxPrice" placeholder="Max Price" value="${esc(filterState.maxPrice)}" oninput="priceChanged()">
+        </div>
+
+        <div class="filter-block">
+          <h4>MRP Range</h4>
+          <input class="price-input" id="minMrp" placeholder="Min MRP" value="${esc(filterState.minMrp)}" oninput="priceChanged()">
+          <input class="price-input" id="maxMrp" placeholder="Max MRP" value="${esc(filterState.maxMrp)}" oninput="priceChanged()">
+        </div>
+      `;
+
+      Object.keys(filterOptions).forEach(field => {
+        html += `
+          <div class="filter-block">
+            <h4>${esc(LABELS[field] || field)}</h4>
+            <input class="filter-search" placeholder="Search ${esc(LABELS[field] || field)}" oninput="filterOptionSearch(this)">
+            <div class="check-list">
+              ${filterOptions[field].map(v => {
+                const isChecked = filterState.values[field] && filterState.values[field].has(String(v)) ? "checked" : "";
+                return `
+                <label class="check-row" data-option="${esc(String(v).toLowerCase())}">
+                  <input type="checkbox" data-field="${esc(field)}" value="${esc(v)}" ${isChecked} onchange="checkboxChanged(this)">
+                  <span>${esc(v)}</span>
+                </label>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+        <div class="filter-block mobile-filter-btn">
+          <button class="action-btn" onclick="toggleFilters(false)" style="width:100%">Apply Filters</button>
+        </div>
+      `;
+
+      panel.innerHTML = html;
+    }
+
+    function checkboxChanged(cb){
+      const field = cb.dataset.field;
+      const value = cb.value;
+
+      if(!filterState.values[field]) filterState.values[field] = new Set();
+
+      cb.checked ? filterState.values[field].add(value) : filterState.values[field].delete(value);
+      applyFilters();
+    }
+
+    function priceChanged(){
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        filterState.minPrice = document.getElementById("minPrice").value;
+        filterState.maxPrice = document.getElementById("maxPrice").value;
+        filterState.minMrp = document.getElementById("minMrp").value;
+        filterState.maxMrp = document.getElementById("maxMrp").value;
+        applyFilters();
+      }, 250);
+    }
+    
+    function removeFilter(field, value){
+      if(field === 'minPrice' || field === 'maxPrice' || field === 'minMrp' || field === 'maxMrp'){
+        filterState[field] = "";
+        document.getElementById(field).value = "";
+      } else {
+        if(filterState.values[field]) {
+          filterState.values[field].delete(value);
+        }
+      }
+      renderFilterPanel();
+      applyFilters();
+    }
+
+    // New matching UI for active filters to mimic the screenshot exactly
+    function renderActiveFilters(){
+      const container = document.getElementById("activeFiltersContainer");
+      let pills = [];
+      
+      if(filterState.minPrice) pills.push({field:'minPrice', val:filterState.minPrice, label:'Min Price', isPrice:true});
+      if(filterState.maxPrice) pills.push({field:'maxPrice', val:filterState.maxPrice, label:'Max Price', isPrice:true});
+      if(filterState.minMrp) pills.push({field:'minMrp', val:filterState.minMrp, label:'Min MRP', isPrice:true});
+      if(filterState.maxMrp) pills.push({field:'maxMrp', val:filterState.maxMrp, label:'Max MRP', isPrice:true});
+      
+      Object.keys(filterState.values).forEach(field => {
+        filterState.values[field].forEach(val => {
+          const fieldLabel = LABELS[field] || field;
+          pills.push({field:field, val:val, label:fieldLabel, isPrice:false});
+        });
+      });
+      
+      if(pills.length > 0){
+        container.innerHTML = `
+          <div class="active-filters-box">
+            ${pills.map(p => `
+              <div class="filter-group">
+                <span class="filter-label">${esc(p.label)} :</span>
+                <div class="filter-val ${p.isPrice ? 'gray-border' : ''}">
+                  ${p.isPrice ? '₹' : ''}${esc(p.val)}
+                  <span class="filter-x" onclick="removeFilter('${jsAttr(p.field)}', '${jsAttr(p.val)}')">&times;</span>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      } else {
+        container.innerHTML = "";
+      }
+    }
+
+    function filterOptionSearch(input){
+      const term = input.value.toLowerCase();
+      input.parentElement.querySelectorAll(".check-row").forEach(row => {
+        row.style.display = row.dataset.option.includes(term) ? "flex" : "none";
+      });
+    }
+
+    function clearAllFilters(){
+      filterState = {
+        values:{},
+        minPrice:"",
+        maxPrice:"",
+        minMrp:"",
+        maxMrp:"",
+        top3Only:false,
+        hideWeak:false,
+        showDifferencesOnly:false,
+        hideSameSpecs:false
+      };
+
+      renderFilterPanel();
+      applyFilters();
+    }
+
+    function applyFilters(){
+      const term = normalizeText(getSearchTerm());
+      const minPrice = parseNullableNumber(filterState.minPrice);
+      const maxPrice = parseNullableNumber(filterState.maxPrice);
+      const minMrp = parseNullableNumber(filterState.minMrp);
+      const maxMrp = parseNullableNumber(filterState.maxMrp);
+
+      filteredProducts = products.filter(p => {
+        if(term && !p.search_blob.includes(term)) return false;
+
+        if(minPrice !== null && (!isFinite(p.price_value) || p.price_value < minPrice)) return false;
+        if(maxPrice !== null && (!isFinite(p.price_value) || p.price_value > maxPrice)) return false;
+        if(minMrp !== null && (!isFinite(p.mrp_value) || p.mrp_value < minMrp)) return false;
+        if(maxMrp !== null && (!isFinite(p.mrp_value) || p.mrp_value > maxMrp)) return false;
+
+        for(const field in filterState.values){
+          const selected = [...filterState.values[field]];
+          if(!selected.length) continue;
+
+          const val = getFilterValue(p, field);
+          if(!selected.includes(String(val))) return false;
+        }
+
+        return true;
+      });
+      
+      renderActiveFilters();
+
+      productGroups = buildGroups(filteredProducts);
+      visibleGroups = productGroups;
+      groupPage = 1;
+
+      renderGroups();
+      renderSliderPanel();
+    }
+
+    function getFilterValue(p, field){
+      if(field === "brand") return p.brand;
+      if(field === "group_label") return p.group_label;
+      if(field === "family") return p.family;
+      if(field === "seller") return p.seller;
+      if(field === "stock_state") return p.stock_state;
+
+      if(p.normalized_specs && p.normalized_specs[field] !== undefined){
+        return displaySpecValue(field, p.normalized_specs[field]);
+      }
+
+      return "NA";
+    }
+
+    function buildGroups(list){
+      const map = {};
+
+      list.forEach(p => {
+        const key = p.group_key || "Ungrouped";
+        if(!map[key]){
+          map[key] = {
+            key,
+            label:p.group_label || key,
+            family:p.family,
+            all:[],
+            visible:[],
+            hidden:[]
+          };
+        }
+        map[key].all.push(p);
+      });
+
+      let groups = Object.values(map).map(g => {
+        // Strict MRP sorting first to ensure Top 3 MRP is perfectly accurate
+        let sortedByMrp = [...g.all].sort((a,b) => validOrInf(a.mrp_value) - validOrInf(b.mrp_value));
+
+        if(filterState.hideWeak){
+            sortedByMrp.sort((a,b) => {
+              const aWeak = a.completeness_score < 4 ? 1 : 0;
+              const bWeak = b.completeness_score < 4 ? 1 : 0;
+              return aWeak - bWeak || (validOrInf(a.mrp_value) - validOrInf(b.mrp_value));
+            });
+        }
+        
+        // Final display sorting is separate, handled by rankProducts
+        g.all = rankProducts(g.all); 
+        
+        // Ensure strictly Top 3 by MRP is displayed when toggled
+        g.visible = filterState.top3Only ? sortedByMrp.slice(0, TOP_LIMIT) : g.all;
+        g.hidden = filterState.top3Only ? sortedByMrp.slice(TOP_LIMIT) : [];
+        return g;
+      });
+
+      groups.sort((a,b) => {
+        const bestA = a.all[0] || {};
+        const bestB = b.all[0] || {};
+        return compareRank(bestA, bestB);
+      });
+
+      return groups;
+    }
+
+    function rankProducts(list){
+      const sort = document.getElementById("sortSelect").value;
+      const ranked = [...list];
+
+      if(sort === "MRP_ASC") return ranked.sort((a,b) => validOrInf(a.mrp_value) - validOrInf(b.mrp_value));
+      if(sort === "MRP_DESC") return ranked.sort((a,b) => validOrNeg(b.mrp_value) - validOrNeg(a.mrp_value));
+      if(sort === "PRICE_ASC") return ranked.sort((a,b) => validOrInf(a.price_value) - validOrInf(b.price_value));
+      if(sort === "PRICE_DESC") return ranked.sort((a,b) => validOrNeg(b.price_value) - validOrNeg(a.price_value));
+      if(sort === "SELLER_DESC") return ranked.sort((a,b) => validOrNeg(b.seller_excellence_score) - validOrNeg(a.seller_excellence_score));
+      if(sort === "STOCK_DESC") return ranked.sort((a,b) => validOrNeg(b.stock_qty) - validOrNeg(a.stock_qty));
+
+      return ranked.sort(compareRank);
+    }
+
+    function compareRank(a,b){
+      return (
+        cmp(validOrInf(a.mrp_value), validOrInf(b.mrp_value)) ||
+        cmp(validOrInf(a.price_value), validOrInf(b.price_value)) ||
+        cmp(validOrNeg(b.seller_excellence_score), validOrNeg(a.seller_excellence_score)) ||
+        cmp(validOrNeg(b.stock_qty), validOrNeg(a.stock_qty)) ||
+        cmp(b.completeness_score || 0, a.completeness_score || 0) ||
+        cmp(a._stableIndex || 0, b._stableIndex || 0)
+      );
+    }
+
+    function renderGroups(){
+      const container = document.getElementById("groupContainer");
+      const totalPages = Math.max(1, Math.ceil(visibleGroups.length / GROUP_PAGE_SIZE));
+      groupPage = Math.min(groupPage, totalPages);
+
+      const start = (groupPage - 1) * GROUP_PAGE_SIZE;
+      const groups = visibleGroups.slice(start, start + GROUP_PAGE_SIZE);
+
+      const totalShown = visibleGroups.reduce((sum,g) => sum + g.visible.length, 0);
+
+      document.getElementById("productCount").textContent =
+        `${totalShown} shown from ${filteredProducts.length} filtered / ${products.length} total`;
+
+      document.getElementById("productPageInfo").textContent =
+        visibleGroups.length ? `Group page ${groupPage} of ${totalPages}` : "No products";
+
+      if(!groups.length){
+        container.innerHTML = `<div class="panel loader">No products found.</div>`;
+      } else {
+        container.innerHTML = groups.map(groupHtml).join("");
+      }
+
+      renderPager("productPages", groupPage, totalPages, p => {
+        groupPage = p;
+        renderGroups();
+        window.scrollTo({top:0,behavior:"smooth"});
+      });
+    }
+
+    function groupHtml(g){
+      const hiddenCount = g.hidden.length;
+
+      return `
+        <section class="group-box">
+          <div class="group-head">
+            <div>
+              <div class="group-name">${esc(g.label)}</div>
+              <div class="group-sub">
+                ${g.all.length} offers found. ${g.visible.length} shown.
+                ${hiddenCount ? hiddenCount + " hidden by Top 3 rule." : ""}
+              </div>
+            </div>
+
+            <div class="group-actions">
+              <span class="pill">${esc(g.family || "General")}</span>
+              ${hiddenCount ? `<button class="small-btn" onclick="showFullGroup('${jsAttr(g.key)}')">Show All ${g.all.length}</button>` : ""}
+            </div>
+          </div>
+
+          <div class="grid">
+            ${g.visible.map(cardHtml).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function showFullGroup(key){
+      const g = productGroups.find(x => x.key === key);
+      if(!g) return;
+      g.visible = g.all;
+      g.hidden = [];
+      renderGroups();
+    }
+
+    function cardHtml(p){
+      const img = validImage(p.image_url);
+      const selected = !!selectedMap[p._idx];
+      const badges = getBadges(p);
+
+      return `
+        <article class="card ${selected ? "selected" : ""}">
+          <div class="image-box" onclick="toggleCompare(${p._idx})">
+            ${img ? `<img src="${esc(img)}" onerror="this.outerHTML='<div class=\\'no-img\\'>No Image</div>'">` : `<div class="no-img">No Image</div>`}
+            <div class="badge-stack">
+              <span class="badge blue">${esc(p.group_label)}</span>
+              ${badges.map(b => `<span class="badge ${b.cls}">${esc(b.text)}</span>`).join("")}
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="title" onclick="openModalByIndex(${p._idx})">${esc(p.title)}</div>
+
+            <div class="meta"><b>Brand:</b> ${esc(p.brand)}</div>
+            <div class="meta"><b>Product ID:</b> ${esc(p.product_id)}</div>
+            <div class="meta"><b>Seller:</b> ${esc(shortText(p.seller, 38))}</div>
+            <div class="meta"><b>Stock:</b> ${esc(p.stock)}</div>
+
+            <span class="rating">Seller Excellence: ${esc(p.seller_excellence)} ★</span>
+
+            <div class="price-zone">
+              <div class="price">${esc(p.price)}</div>
+              <div class="mrp">MRP: ${esc(p.mrp)}</div>
+              <div class="discount">Discount: ${esc(p.discount)}</div>
+            </div>
+
+            <div class="card-actions">
+              <button class="compare-btn" onclick="toggleCompare(${p._idx})">${selected ? "Remove" : "Compare"}</button>
+              <button onclick="openModalByIndex(${p._idx})">Details</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function getBadges(p){
+      const group = productGroups.find(g => g.key === p.group_key);
+      if(!group) return [];
+
+      const badges = [];
+      const validMrps = group.all.filter(x => isFinite(x.mrp_value)).map(x => x.mrp_value);
+      const validPrices = group.all.filter(x => isFinite(x.price_value)).map(x => x.price_value);
+      const validScores = group.all.filter(x => isFinite(x.seller_excellence_score)).map(x => x.seller_excellence_score);
+
+      if(validMrps.length && p.mrp_value === Math.min(...validMrps)) badges.push({text:"Lowest MRP", cls:"green"});
+      if(validPrices.length && p.price_value === Math.min(...validPrices)) badges.push({text:"Lowest Offer", cls:"green"});
+      if(validScores.length && p.seller_excellence_score === Math.max(...validScores)) badges.push({text:"Top Seller", cls:"blue"});
+      if(p.stock_state === "In Stock") badges.push({text:"Ready Stock", cls:"blue"});
+      if(p.hide_reasons && p.hide_reasons.length) badges.push({text:p.hide_reasons[0], cls:"red"});
+
+      return badges.slice(0,3);
+    }
+    
+    function updateCompareBtnCount(){
+      const count = Object.keys(selectedMap).length;
+      document.getElementById("compareBtnCount").textContent = count;
+    }
+
+    function toggleCompare(idx){
+      const p = products.find(x => x._idx === idx);
+      if(!p) return;
+
+      if(selectedMap[idx]){
+        delete selectedMap[idx];
+      } else {
+        const count = Object.keys(selectedMap).length;
+        if(count >= MAX_COMPARE){
+          alert("Maximum " + MAX_COMPARE + " products can be compared at one time.");
+          return;
+        }
+        selectedMap[idx] = true;
+      }
+
+      updateCompareBtnCount();
+      renderGroups();
+      renderSliderPanel();
+      
+      // Auto open panel if adding to compare and it's not open
+      if(selectedMap[idx] && !document.getElementById("compareSlider").classList.contains("open")){
+         toggleComparePanel(true);
+      }
+    }
+    
+    function toggleComparePanel(open){
+      const panel = document.getElementById("compareSlider");
+      const overlay = document.getElementById("sliderOverlay");
+      if(open){
+        panel.classList.add("open");
+        overlay.classList.add("open");
+      } else {
+        panel.classList.remove("open");
+        overlay.classList.remove("open");
+      }
+    }
+
+    // Auto L1 logic
+    function getRankedCompareProducts(){
+      const selected = Object.keys(selectedMap)
+        .map(idx => products.find(p => String(p._idx) === String(idx)))
+        .filter(Boolean);
+
+      // Rank by price primarily
+      selected.sort((a,b) => {
+         return cmp(validOrInf(a.price_value), validOrInf(b.price_value)) || 
+                cmp(validOrInf(a.mrp_value), validOrInf(b.mrp_value));
+      });
+      
+      let currentRank = 1;
+      let lastPrice = -1;
+      
+      return selected.map((p, index) => {
+        if(index === 0) {
+          lastPrice = validOrInf(p.price_value);
+        } else {
+          const pPrice = validOrInf(p.price_value);
+          if(pPrice > lastPrice) {
+            currentRank++;
+            lastPrice = pPrice;
+          }
+        }
+        
+        let rankLabel = "Other";
+        if(currentRank === 1) rankLabel = "L1";
+        else if(currentRank === 2) rankLabel = "L2";
+        else if(currentRank === 3) rankLabel = "L3";
+        
+        return {
+          ...p,
+          gemRank: rankLabel
+        };
+      });
+    }
+
+    function generateL1Report(){
+      const selected = getRankedCompareProducts();
+      const l1Product = selected.find(p => p.gemRank === "L1") || selected[0];
+      if(!l1Product) return;
+      
+      const btn = document.querySelector(".compare-controls button");
+      const oldText = btn.innerText;
+      btn.innerText = "Syncing with GeM...";
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(res => {
+          btn.innerText = oldText;
+          btn.disabled = false;
+          if(res && res.success) {
+            showGeMToast(res.message, "success");
+          } else {
+            showGeMToast("Error triggering sync: " + (res ? res.error : "Unknown error"), "error");
+          }
+        })
+        .withFailureHandler(err => {
+          btn.innerText = oldText;
+          btn.disabled = false;
+          showGeMToast("Failed to connect to backend: " + err, "error");
+        })
+        .requestL1Update(l1Product.product_url, l1Product.category || "Unknown");
+    }
+
+    // Generate L1 Parameters UI dynamically based on L1 winner
+    function renderL1Parameters(l1Product){
+      if(!l1Product) return "";
+      
+      const specs = l1Product.raw_specs || {};
+      const keysToShow = Object.keys(specs).slice(0, 10); // Show up to 10 specs of L1 as parameters
+      
+      if(keysToShow.length === 0) return "";
+
+      const pillsHtml = keysToShow.map(k => `
+        <div class="filter-group">
+          <span class="filter-label">${esc(k)} :</span>
+          <div class="filter-val">${esc(specs[k])}</div>
+        </div>
+      `).join("");
+
+      return `
+        <div style="padding: 0 20px;">
+          <div style="margin-top: 15px; font-weight: 900; color: #172635;">Parameters of Selected L1 Product</div>
+          <div class="active-filters-box">
+             ${pillsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSliderPanel(){
+      const panel = document.getElementById("compareSlider");
+      const selected = getRankedCompareProducts();
+
+      let html = `
+        <div class="compare-head">
+          <b>Side-by-Side Compare (${selected.length})</b>
+          <button class="close-btn-white" onclick="toggleComparePanel(false)">Close</button>
+        </div>
+
+        <div class="compare-controls">
+          <button onclick="generateL1Report()">Generate L1 Report</button>
+          <button onclick="clearCompare()">Clear Compare</button>
+          <button class="${filterState.showDifferencesOnly ? 'active-btn':''}" onclick="filterState.showDifferencesOnly=!filterState.showDifferencesOnly;renderSliderPanel();">
+            Show Differences Only
+          </button>
+          <button class="${filterState.hideSameSpecs ? 'active-btn':''}" onclick="filterState.hideSameSpecs=!filterState.hideSameSpecs;renderSliderPanel();">
+            Hide Same Specs
+          </button>
+        </div>
+      `;
+
+      if(!selected.length){
+        html += `<div style="padding:40px; text-align:center; color:#687684; font-weight:bold; font-size:16px;">No products selected for comparison.<br><br>Click "Compare" on products to add them here.</div>`;
+        panel.innerHTML = html;
+        return;
+      }
+
+      // Add the golden parameter box for L1
+      const l1Product = selected.find(p => p.gemRank === "L1") || selected[0];
+      html += renderL1Parameters(l1Product);
+
+      const rows = buildCompareRows(selected);
+
+      html += `
+        <div class="compare-table-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th class="param-col">Parameter</th>
+                ${selected.map(p => `
+                  <th class="compare-product">
+                    <button class="remove-x" onclick="toggleCompare(${p._idx})">x</button>
+                    ${validImage(p.image_url) ? `<img class="mini-img" src="${esc(validImage(p.image_url))}">` : ""}
+                    <div class="rank-badge rank-${p.gemRank}">${p.gemRank}</div>
+                    <div>${esc(shortText(p.title, 60))}</div>
+                  </th>
+                `).join("")}
+              </tr>
+            </thead>
+
+            <tbody>
+              ${rows.map(row => {
+                if((filterState.showDifferencesOnly || filterState.hideSameSpecs) && !row.differs) return "";
+
+                return `
+                  <tr>
+                    <th class="param-col">${esc(row.label)}</th>
+                    ${row.values.map((v,i) => `
+                      <td class="${row.differs ? "diff-cell" : ""} ${row.bestIndex === i ? "best-cell" : ""}">
+                        ${esc(v.display)}
+                      </td>
+                    `).join("")}
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      panel.innerHTML = html;
+    }
+
+    function buildCompareRows(selected){
+      const baseRows = [
+        {key:"brand", label:"Brand", getter:p=>p.brand},
+        {key:"product_id", label:"Product ID", getter:p=>p.product_id},
+        {key:"mrp", label:"MRP", getter:p=>p.mrp, numeric:p=>p.mrp_value, best:"min"},
+        {key:"price", label:"Offer Price", getter:p=>p.price, numeric:p=>p.price_value, best:"min"},
+        {key:"discount", label:"Discount", getter:p=>p.discount},
+        {key:"seller", label:"Seller", getter:p=>p.seller},
+        {key:"seller_excellence", label:"Seller Excellence", getter:p=>p.seller_excellence, numeric:p=>p.seller_excellence_score, best:"max"},
+        {key:"stock", label:"Stock", getter:p=>p.stock, numeric:p=>p.stock_qty, best:"max"}
+      ];
+
+      const specKeys = new Set();
+      selected.forEach(p => {
+        Object.keys(p.normalized_specs || {}).forEach(k => specKeys.add(k));
+        Object.keys(p.raw_specs || {}).forEach(k => specKeys.add("raw__" + k));
+      });
+
+      const rows = [];
+
+      baseRows.forEach(r => rows.push(makeCompareRow(r, selected)));
+
+      [...specKeys].sort(naturalSort).forEach(k => {
+        if(k.indexOf("raw__") === 0){
+          const rawKey = k.replace("raw__","");
+          rows.push(makeCompareRow({
+            key:k,
+            label:rawKey,
+            getter:p => safe((p.raw_specs || {})[rawKey] || "NA")
+          }, selected));
+        } else {
+          rows.push(makeCompareRow({
+            key:k,
+            label:LABELS[k] || k,
+            getter:p => displaySpecValue(k, (p.normalized_specs || {})[k])
+          }, selected));
+        }
+      });
+
+      return rows;
+    }
+
+    function makeCompareRow(def, selected){
+      const values = selected.map(p => {
+        const display = safe(def.getter(p));
+        const norm = normalizeCompareValue(display);
+        return {display, norm, num:def.numeric ? def.numeric(p) : null};
+      });
+
+      const unique = [...new Set(values.map(v => v.norm))].filter(v => v !== "na");
+      const differs = unique.length > 1 || values.some(v => v.norm === "na") && unique.length > 0;
+
+      let bestIndex = -1;
+      if(def.best){
+        const nums = values.map(v => isFinite(v.num) ? v.num : null);
+        const valid = nums.filter(v => v !== null);
+
+        if(valid.length){
+          const bestVal = def.best === "min" ? Math.min(...valid) : Math.max(...valid);
+          bestIndex = nums.findIndex(v => v === bestVal);
+        }
+      }
+
+      return {
+        label:def.label,
+        values,
+        differs,
+        bestIndex
+      };
+    }
+
+    function clearCompare(){
+      selectedMap = {};
+      updateCompareBtnCount();
+      renderGroups();
+      renderSliderPanel();
+    }
+
+    function getSelectedProducts(){
+      return Object.keys(selectedMap)
+        .map(idx => products.find(p => String(p._idx) === String(idx)))
+        .filter(Boolean);
+    }
+
+    function openModalByIndex(idx){
+      const p = products.find(x => x._idx === idx);
+      if(!p) return;
+
+      const specs = p.raw_specs || {};
+      const rows = Object.keys(specs)
+        .filter(k => isMeaningful(specs[k]))
+        .map(k => `<tr><th>${esc(k)}</th><td>${esc(specs[k])}</td></tr>`)
+        .join("") || `<tr><td colspan="2" style="text-align:center">Specifications not available</td></tr>`;
+
+      const img = validImage(p.image_url);
+
+      document.getElementById("modalBody").innerHTML = `
+        <div class="product-top">
+          <div class="modal-img">
+            ${img ? `<img src="${esc(img)}" onerror="this.outerHTML='<div class=\\'no-img\\'>No Image</div>'">` : `<div class="no-img">No Image</div>`}
+          </div>
+
+          <div class="modal-info">
+            <h2>${esc(p.title)}</h2>
+
+            <div class="price-box">
+              <span class="muted">Offer Price</span>
+              <div class="modal-price">${esc(p.price)}</div>
+              <div class="muted">MRP: ${esc(p.mrp)} | Discount: ${esc(p.discount)}</div>
+            </div>
+
+            <div class="info-grid">
+              <div class="info-cell"><span>Seller</span><b>${esc(p.seller)}</b></div>
+              <div class="info-cell"><span>Seller Excellence</span><b>${esc(p.seller_excellence)}</b></div>
+              <div class="info-cell"><span>Product ID</span><b>${esc(p.product_id)}</b></div>
+              <div class="info-cell"><span>Stock</span><b>${esc(p.stock)}</b></div>
+              <div class="info-cell"><span>Brand</span><b>${esc(p.brand)}</b></div>
+              <div class="info-cell"><span>Same Size Group</span><b>${esc(p.group_label)}</b></div>
+            </div>
+
+            <a class="gem-link" href="${esc(p.product_url || "#")}" target="_blank">View on GeM</a>
+          </div>
+        </div>
+
+        <div class="spec-title">Full Technical Specification</div>
+        <table class="spec-table"><tbody>${rows}</tbody></table>
+      `;
+
+      document.getElementById("modal").style.display = "block";
+    }
+
+    function renderPager(id, page, total, handler){
+      const box = document.getElementById(id);
+      let pages = [];
+
+      window.__pageHandlers = window.__pageHandlers || {};
+      window.__pageHandlers[id] = handler;
+
+      const add = (label, p, disabled, active) => {
+        pages.push(`<button class="page-btn ${active ? "active" : ""}" ${disabled ? "disabled" : ""} onclick="window.__pageHandlers['${id}'](${p})">${label}</button>`);
+      };
+
+      add("First", 1, page === 1, false);
+      add("Prev", Math.max(1, page - 1), page === 1, false);
+
+      let s = Math.max(1, page - 2);
+      let e = Math.min(total, s + 4);
+      if(e - s < 4) s = Math.max(1, e - 4);
+
+      for(let i=s; i<=e; i++) add(String(i), i, false, i === page);
+
+      add("Next", Math.min(total, page + 1), page === total, false);
+      add("Last", total, page === total, false);
+
+      box.innerHTML = pages.join("");
+    }
+
+
+
+    function exportCurrentCategoryJson(){
+      const brand = prompt("Enter brand name for export. Leave blank to export full selected category JSON:", "");
+      if(brand === null) return;
+
+      const source = Array.isArray(rawProducts) && rawProducts.length ? rawProducts : products;
+      const filtered = filterOriginalProductsForExport(source, brand);
+
+      if(!filtered.length){
+        alert("No products found for this brand in the selected category. Try partial brand name also, for example BANKOMAT instead of full registered brand.");
+        return;
+      }
+
+      const fileName = buildClientExportFileName(currentCategory || "Category", brand);
+      downloadJsonFile(filtered, fileName);
+    }
+
+    function exportSingleCategoryJson(category){
+      const brand = prompt("Enter brand name for export. Leave blank to export full category JSON:", "");
+      if(brand === null) return;
+
+      if(hasGas()){
+        showLoader("Preparing JSON export...");
+        google.script.run
+          .withSuccessHandler(function(res){
+            hideLoader();
+            showOnly("categoryView");
+            handleServerExportResponse(res, category, brand);
+          })
+          .withFailureHandler(function(err){
+            hideLoader();
+            showOnly("categoryView");
+            alert("Export Error: " + err.message);
+          })
+          .exportProductsJson({ categoryName: category, categoryNames: [category], brandQuery: brand });
+      } else {
+        const filtered = filterOriginalProductsForExport(MOCK_PRODUCTS.filter(p => p.category === category), brand);
+        if(!filtered.length) return alert("No products found for this brand in the selected category.");
+        downloadJsonFile(filtered, buildClientExportFileName(category, brand));
+      }
+    }
+
+    function exportSearchResultJson(){
+      const categoryQuery = getSearchTerm();
+
+      if(!categoryQuery){
+        alert("Please type a category search first, for example Currency or Currency Counting Machine, then click Export Search JSON. This prevents timeout from scanning all category files.");
+        return;
+      }
+
+      const matchedCategoryCount = Array.isArray(categoryFiltered) ? categoryFiltered.length : 0;
+
+      if(matchedCategoryCount > 50){
+        alert("Your search is matching " + matchedCategoryCount + " category files. Please refine the search to 50 or fewer categories, for example Currency Counting Machine instead of Currency.");
+        return;
+      }
+
+      const brand = prompt("Enter brand name for export. Leave blank to export all products from current category search:", "");
+      if(brand === null) return;
+
+      const visibleCategoryNames = Array.isArray(categoryFiltered) ? categoryFiltered.slice(0, 50).map(getCategoryName) : [];
+
+      if(!visibleCategoryNames.length){
+        alert("No category found for this search.");
+        return;
+      }
+
+      if(hasGas()){
+        showLoader("Preparing JSON export from " + visibleCategoryNames.length + " category file(s)...");
+        google.script.run
+          .withSuccessHandler(function(res){
+            hideLoader();
+            showOnly("categoryView");
+            handleServerExportResponse(res, categoryQuery || "Category_Search", brand);
+          })
+          .withFailureHandler(function(err){
+            hideLoader();
+            showOnly("categoryView");
+            alert("Export Error: " + err.message);
+          })
+          .exportProductsJson({
+            categoryQuery: categoryQuery,
+            categoryNames: visibleCategoryNames,
+            brandQuery: brand
+          });
+      } else {
+        const matchedCategories = categories.filter(c => !categoryQuery || normalizeClientSearch(getCategoryName(c)).includes(normalizeClientSearch(categoryQuery))).map(getCategoryName);
+        const data = MOCK_PRODUCTS.filter(p => matchedCategories.includes(p.category));
+        const filtered = filterOriginalProductsForExport(data, brand);
+        if(!filtered.length) return alert("No products found for this brand in the selected category search.");
+        downloadJsonFile(filtered, buildClientExportFileName(categoryQuery || "Category_Search", brand));
+      }
+    }
+
+    function handleServerExportResponse(res, category, brand){
+      if(!res || res.success === false){
+        alert((res && res.error) ? res.error : "Export failed.");
+        return;
+      }
+
+      const data = Array.isArray(res.products) ? res.products : [];
+      if(!data.length){
+        const debug = res
+          ? `\n\nScanned files: ${res.scannedFiles || 0}\nMatched category files: ${res.matchedCategoryFiles || 0}`
+          : "";
+        alert(brand ? "No products found for this brand in the selected category/search." + debug : "No products found for export." + debug);
+        return;
+      }
+
+      downloadJsonFile(data, res.fileName || buildClientExportFileName(category, brand));
+    }
+
+    function filterOriginalProductsForExport(list, brand){
+      const brandNeedle = normalizeClientSearch(brand);
+      const seen = {};
+      const out = [];
+
+      (list || []).forEach(item => {
+        if(!item || typeof item !== "object") return;
+
+        const original = stripInternalProductFields(item);
+
+        if(brandNeedle && !clientProductMatchesBrand(original, brandNeedle)) return;
+
+        const key = String(original.product_id || original.product_url || original.url || original.link || JSON.stringify(original).slice(0, 500));
+        if(seen[key]) return;
+        seen[key] = true;
+        out.push(original);
+      });
+
+      return out;
+    }
+
+    function clientProductMatchesBrand(product, brandNeedle){
+      const productBrand = normalizeClientSearch(getOriginalBrandValue(product));
+      const title = normalizeClientSearch(product.title || product.product_name || product.name || product.productName || "");
+      const make = normalizeClientSearch(product.make || product.manufacturer || product.brand_name || "");
+      const fullJson = normalizeClientSearch(JSON.stringify(product));
+
+      const haystack = normalizeClientSearch([productBrand, stripGemRegisteredSuffixClient(productBrand), title, make, fullJson].join(" "));
+      const looseHaystack = normalizeClientLoose(haystack);
+      const looseNeedle = normalizeClientLoose(brandNeedle);
+      const looseNeedleWithoutR = stripGemRegisteredSuffixClient(looseNeedle);
+      const brandLoose = normalizeClientLoose(productBrand);
+      const brandWithoutR = stripGemRegisteredSuffixClient(brandLoose);
+
+      if(!brandNeedle) return true;
+      if(haystack.includes(brandNeedle)) return true;
+      if(looseHaystack.includes(looseNeedle)) return true;
+      if(looseNeedleWithoutR && looseHaystack.includes(looseNeedleWithoutR)) return true;
+      if(brandLoose.includes(looseNeedle)) return true;
+      if(brandWithoutR.includes(looseNeedle)) return true;
+
+      const tokens = brandNeedle.split(" ").filter(t => t.length >= 2);
+      if(tokens.length && tokens.every(t => haystack.includes(t))) return true;
+
+      return false;
+    }
+
+    function stripInternalProductFields(product){
+      const clone = {};
+      Object.keys(product || {}).forEach(k => {
+        if(!k.startsWith("_")) clone[k] = product[k];
+      });
+      return clone;
+    }
+
+    function getOriginalBrandValue(product){
+      return String(product.brand || product.brand_name || product.manufacturer || product.make || product.oem || product.oem_name || "").trim();
+    }
+
+    function normalizeClientSearch(value){
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[_\-]+/g," ")
+        .replace(/®|™/g,"")
+        .replace(/[^a-z0-9]+/g," ")
+        .replace(/\s+/g," ")
+        .trim();
+    }
+
+    function normalizeClientLoose(value){
+      return String(value || "")
+        .toLowerCase()
+        .replace(/®|™/g,"")
+        .replace(/[^a-z0-9]+/g,"")
+        .trim();
+    }
+
+    function stripGemRegisteredSuffixClient(value){
+      let text = String(value || "").trim();
+      while(text.length > 3 && text.endsWith("r")){
+        text = text.slice(0, -1);
+      }
+      return text;
+    }
+
+    function buildClientExportFileName(category, brand){
+      const cat = safeFilePart(category || "Category");
+      const br = brand ? "_" + safeFilePart(brand) : "_Full";
+      return cat + br + "_Filtered.json";
+    }
+
+    function safeFilePart(value){
+      return String(value || "")
+        .replace(/\.json$/i, "")
+        .replace(/[^a-zA-Z0-9]+/g,"_")
+        .replace(/^_+|_+$/g,"")
+        .slice(0, 80) || "Export";
+    }
+
+    function downloadJsonFile(data, fileName){
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName || "export.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+
+    function bindSearch(){
+      document.getElementById("globalSearch").addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          currentView === "categories" ? renderCategoryPage() : applyFilters();
+        }, 250);
+      });
+    }
+
+    function runSearchNow(){
+      currentView === "categories" ? renderCategoryPage() : applyFilters();
+    }
+
+    function syncData(){
+      if(hasGas()){
+        showLoader("Refreshing Drive cache...");
+        google.script.run
+          .withSuccessHandler(fetchCategories)
+          .withFailureHandler(err => showLoader("Sync Error: " + err.message))
+          .forceRefreshCache();
+      } else {
+        fetchCategories();
+      }
+    }
+
+    function backToCategories(){
+      currentView = "categories";
+      document.getElementById("globalSearch").value = "";
+      renderCategoryPage();
+    }
+
+    function toggleFilters(open){
+      document.getElementById("filterPanel").classList.toggle("open", open);
+    }
+
+    function closeModal(){
+      document.getElementById("modal").style.display = "none";
+    }
+
+    window.onclick = e => {
+      if(e.target === document.getElementById("modal")) closeModal();
+    };
+
+      function showOnly(id){
+        ["categoryView","productView"].forEach(x => {
+          document.getElementById(x).classList.toggle("hidden", x !== id);
+        });
+        if(id === "productView") {
+          document.getElementById("topbarBackBtn").classList.remove("hidden");
+        } else {
+          document.getElementById("topbarBackBtn").classList.add("hidden");
+        }
+      }
+
+    function showLoader(text){
+      const loader = document.getElementById("loader");
+      loader.style.display = "block";
+      loader.classList.remove("hidden");
+      loader.textContent = text;
+      ["categoryView","productView"].forEach(x => document.getElementById(x).classList.add("hidden"));
+    }
+
+    function hideLoader(){
+      const loader = document.getElementById("loader");
+      loader.classList.add("hidden");
+      loader.style.display = "none";
+    }
+
+    function getSearchTerm(){
+      return document.getElementById("globalSearch").value.toLowerCase().trim();
+    }
+
+    function parseMoney(v){
+      if(!isMeaningful(v)) return MONEY_INF;
+      const n = parseFloat(String(v).replace(/[^0-9.]/g,""));
+      return isNaN(n) ? MONEY_INF : n;
+    }
+
+    function parseNullableNumber(v){
+      if(v === "" || v === null || v === undefined) return null;
+      const n = Number(String(v).replace(/[^0-9.]/g,""));
+      return isNaN(n) ? null : n;
+    }
+
+    function parseSellerScore(v){
+      if(!isMeaningful(v)) return null;
+      const nums = String(v).match(/\d+(?:\.\d+)?/g);
+      if(!nums || !nums.length) return null;
+      const values = nums.map(Number);
+      return values.reduce((a,b)=>a+b,0) / values.length;
+    }
+
+    function parseStockQty(v){
+      if(!isMeaningful(v)) return null;
+      const s = String(v).toLowerCase();
+      if(/out\s*of\s*stock|not\s*available/.test(s)) return 0;
+      const n = parseFloat(s.replace(/,/g,"").match(/\d+(?:\.\d+)?/)?.[0] || "");
+      if(!isNaN(n)) return n;
+      if(/in\s*stock|available/.test(s)) return 1;
+      return null;
+    }
+
+    function parseStockState(v){
+      if(!isMeaningful(v)) return "Unknown";
+      const s = String(v).toLowerCase();
+      if(/out\s*of\s*stock|not\s*available/.test(s)) return "Out of Stock";
+      if(/in\s*stock|available/.test(s)) return "In Stock";
+      return "Unknown";
+    }
+
+    function parseCapacityLitres(text){
+      let m = text.match(/(\d+(?:\.\d+)?)\s*(ltr|litre|litres|liter|liters|l)\b/);
+      if(m) return round2(Number(m[1]));
+
+      m = text.match(/(\d+(?:\.\d+)?)\s*(ml|millilitre|milliliter)\b/);
+      if(m) return round2(Number(m[1]) / 1000);
+
+      return null;
+    }
+
+    function parseDimension(text, labels){
+      for(const label of labels){
+        const re = new RegExp(label + "\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(mm|millimeter|millimetre|cm|meter|metre|m|inch|inches|in|\\\")", "i");
+        const m = text.match(re);
+        if(m) return convertToMm(Number(m[1]), m[2]);
+      }
+
+      return null;
+    }
+
+    function convertToMm(n, unit){
+      unit = String(unit || "").toLowerCase();
+      if(unit === "mm" || unit.includes("mill")) return round2(n);
+      if(unit === "cm") return round2(n * 10);
+      if(unit === "m" || unit.includes("meter") || unit.includes("metre")) return round2(n * 1000);
+      if(unit === "in" || unit.includes("inch") || unit === '"') return round2(n * 25.4);
+      return round2(n);
+    }
+
+    function parseNominalNo(text){
+      const m = text.match(/\bno\.?\s*[-:]?\s*(\d{1,4})\b/);
+      return m ? m[1] : null;
+    }
+
+    function parseStandard(text){
+      const m = text.match(/\b(is|ongc|astm|bis|iso)\s*[-\/]?\s*[a-z0-9\/\- ]{2,20}\b/i);
+      return m ? m[0].toUpperCase().replace(/\s+/g," ").trim() : null;
+    }
+
+    function parsePackSize(text){
+      const m = text.match(/\b(\d+(?:\.\d+)?)\s*(kg|g|gm|gram|grams|ltr|litre|litres|liter|liters|ml|l)\b/i);
+      return m ? m[0].toUpperCase() : null;
+    }
+
+    function parseMaterial(text){
+      if(/aluminium|aluminum/.test(text)) return "Aluminium";
+      if(/steel/.test(text)) return "Steel";
+      if(/plastic|hdpe|pp/.test(text)) return "Plastic / Polymer";
+      return null;
+    }
+
+    function parseGrade(text){
+      const m = text.match(/\b(grade|alloy|temper)\s*[:\-]?\s*([a-z0-9\- ]{2,20})/i);
+      return m ? m[2].trim().toUpperCase() : null;
+    }
+
+    function parseType(specs){
+      if(!specs) return null;
+      const keys = ["Type","Type Of Clamps","Item","Product Type","Container Type"];
+      for(const k of keys){
+        if(isMeaningful(specs[k])) return String(specs[k]).trim();
+      }
+      return null;
+    }
+
+    function parseAnySimpleSize(text){
+      const patterns = [
+        /(\d+(?:\.\d+)?)\s*(ltr|litre|litres|liter|liters|l)\b/,
+        /(\d+(?:\.\d+)?)\s*(mm|cm|m|meter|metre|inch|inches|in)\b/,
+        /\bno\.?\s*[-:]?\s*(\d{1,4})\b/
+      ];
+
+      for(const re of patterns){
+        const m = text.match(re);
+        if(m) return m[0];
+      }
+
+      return null;
+    }
+
+    function normalizeText(v){
+      return String(v || "")
+        .toLowerCase()
+        .replace(/aluminum/g,"aluminium")
+        .replace(/litres|liters|litre|liter|ltr/g,"l")
+        .replace(/metres|meters|metre|meter|mtr/g,"m")
+        .replace(/millimeters|millimetres|millimeter|millimetre/g,"mm")
+        .replace(/inches|inch/g,"in")
+        .replace(/[^a-z0-9.]+/g," ")
+        .replace(/\s+/g," ")
+        .trim();
+    }
+
+    function normalizeCompareValue(v){
+      return normalizeText(v || "NA");
+    }
+
+    function displaySpecValue(key, value){
+      if(value === undefined || value === null || value === "") return "NA";
+      if(key.endsWith("_mm")) return formatNum(value) + " mm";
+      if(key === "capacity_l") return formatNum(value) + " L";
+      return String(value);
+    }
+
+    function validImage(url){
+      if(!url) return "";
+      const s = String(url).trim();
+      return (!s || s.toUpperCase() === "NA" || s === "#") ? "" : s;
+    }
+
+    function isMeaningful(v){
+      if(v === null || v === undefined) return false;
+      const s = String(v).trim();
+      return s && s.toUpperCase() !== "NA" && s !== "-";
+    }
+
+    function safe(v){
+      if(v === null || v === undefined) return "NA";
+      const s = String(v).trim();
+      return s ? s : "NA";
+    }
+
+    function validOrInf(v){
+      return isFinite(v) ? v : MONEY_INF;
+    }
+
+    function validOrNeg(v){
+      return isFinite(v) ? v : -1;
+    }
+
+    function cmp(a,b){
+      return a < b ? -1 : a > b ? 1 : 0;
+    }
+
+    function round2(n){
+      return Math.round(n * 100) / 100;
+    }
+
+    function formatNum(n){
+      if(n === null || n === undefined || n === "") return "NA";
+      return Number(n) % 1 === 0 ? String(Number(n)) : String(round2(Number(n)));
+    }
+
+    function shortText(text, len){
+      text = String(text || "");
+      return text.length > len ? text.slice(0, len - 3) + "..." : text;
+    }
+
+    function esc(v){
+      return String(v ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
+    function jsAttr(v){
+      return String(v)
+        .replace(/\\/g,"\\\\")
+        .replace(/'/g,"\\'");
+    }
+
+    function naturalSort(a,b){
+      return String(a).localeCompare(String(b), undefined, {numeric:true, sensitivity:"base"});
+    }
+
+    // AI Chatbot Logic
+    const GEMINI_API_KEY = "AIzaSyCoEzL-JBKpk3dumymNzq_ZVgfCFBHua2o";
+    let chatHistory = [
+      { role: "user", parts: [{ text: "You are an expert AI assistant built into a GeM (Government e Marketplace) Product Comparison Portal. Your job is to help the user understand how to create an L1 link, how to analyze product specifications, and explain which parameters make a product unique. Keep your answers extremely concise, professional, and directly actionable. Use bullet points if necessary." }]},
+      { role: "model", parts: [{ text: "Understood. I am ready to provide expert GeM comparison assistance!" }]}
+    ];
+
+    function toggleChat() {
+      const w = document.getElementById("chatWidget");
+      const icon = document.getElementById("chatToggleIcon");
+      if (w.classList.contains("open")) {
+        w.classList.remove("open");
+        icon.textContent = "▲";
+      } else {
+        w.classList.add("open");
+        icon.textContent = "▼";
+        setTimeout(() => document.getElementById("chatInput").focus(), 300);
+      }
+    }
+
+    function handleChatEnter(e) {
+      if (e.key === "Enter") sendChatMessage();
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById("chatInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMsg(text, "user");
+      input.value = "";
+      
+      let context = "";
+      if (typeof getRankedCompareProducts === "function") {
+          const selected = getRankedCompareProducts();
+          if (selected.length > 0) {
+              const l1 = selected.find(p => p.gemRank === "L1") || selected[0];
+              context = `\n\n[System Context: The user is currently viewing the Compare panel with ${selected.length} products. The L1 winner is '` + l1.title + `' (Price: ` + l1.price + `, Seller: ` + l1.seller + `). Its top specifications are: ` + JSON.stringify(l1.raw_specs || {}) + `]`;
+          }
+      }
+
+      chatHistory.push({ role: "user", parts: [{ text: text + context }] });
+      
+      const loadingId = appendMsg("Thinking...", "ai");
+
+      try {
+        const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: chatHistory })
+        });
+        
+        const data = await res.json();
+        
+        if (data.error) {
+           throw new Error(data.error.message || "API Error");
+        }
+        
+        const reply = data.candidates[0].content.parts[0].text;
+        chatHistory.push({ role: "model", parts: [{ text: reply }] });
+        updateMsg(loadingId, reply);
+      } catch (err) {
+        updateMsg(loadingId, "Error: Could not connect to AI. " + err.message);
+        chatHistory.pop(); // Remove failed message from history
+      }
+    }
+
+    function appendMsg(text, sender) {
+      const body = document.getElementById("chatBody");
+      const div = document.createElement("div");
+      div.className = `chat-msg ${sender}-msg`;
+      const id = "msg_" + Date.now();
+      div.id = id;
+      div.textContent = text;
+      body.appendChild(div);
+      body.scrollTop = body.scrollHeight;
+      return id;
+    }
+
+    function updateMsg(id, text) {
+      const div = document.getElementById(id);
+      if (div) {
+        let htmlText = esc(text).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+        div.innerHTML = htmlText;
+        document.getElementById("chatBody").scrollTop = document.getElementById("chatBody").scrollHeight;
+      }
+    }
+
+    function showGeMToast(message, type = "success") {
+      let container = document.getElementById("gemToastContainer");
+      if (!container) {
+        container = document.createElement("div");
+        container.id = "gemToastContainer";
+        document.body.appendChild(container);
+        if (!document.getElementById("gemToastStyles")) {
+          const style = document.createElement("style");
+          style.id = "gemToastStyles";
+          style.innerHTML = `
+            #gemToastContainer { position: fixed; bottom: 30px; right: 30px; z-index: 99999; display: flex; flex-direction: column; gap: 12px; }
+            .gem-toast { background: #fff; color: #1d2730; padding: 16px 20px; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); border-left: 5px solid var(--blue); font-size: 15px; display: flex; align-items: center; gap: 12px; min-width: 320px; max-width: 450px; animation: toastSlideIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; font-weight: 500; font-family: "Segoe UI", Arial, sans-serif; }
+            .gem-toast.error { border-left-color: var(--danger); }
+            .gem-toast.success { border-left-color: var(--green); }
+            .gem-toast-icon { font-size: 20px; font-weight: bold; }
+            .gem-toast.success .gem-toast-icon { color: var(--green); content: "?"; }
+            .gem-toast.error .gem-toast-icon { color: var(--danger); content: "?"; }
+            @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            @keyframes toastFadeOut { to { opacity: 0; margin-top: -60px; } }
+          `;
+          document.head.appendChild(style);
+        }
+      }
+      const toast = document.createElement("div");
+      toast.className = "gem-toast " + type;
+      const icon = document.createElement("div");
+      icon.className = "gem-toast-icon";
+      icon.textContent = type === "success" ? "?" : "?";
+      const text = document.createElement("div");
+      text.style.flex = "1";
+      text.textContent = message;
+      toast.appendChild(icon);
+      toast.appendChild(text);
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.animation = "toastFadeOut 0.4s forwards"; setTimeout(() => toast.remove(), 400); }, 5000);
+    }
+  
+// Tracker Logic
+function openTrackerMode() {
+  document.querySelector('.hero').classList.add('hidden');
+  document.getElementById('categoryView').classList.add('hidden');
+  document.getElementById('productView').classList.add('hidden');
+  document.getElementById('trackerView').classList.remove('hidden');
+  loadTrackedProducts();
+}
+
+async function startTracking() {
+  const pid = document.getElementById('trackProductIdInput').value.trim();
+  if(!pid) return alert('Please enter a Product ID');
+  
+  const resDiv = document.getElementById('trackerResults');
+  resDiv.innerHTML = '<div class="panel loader">Locking specifications and searching market...</div>';
+  
+  try {
+    const res = await fetch('http://localhost:8000/trackProduct', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: pid, client_email: document.getElementById('trackClientEmail').value.trim() })
+    });
+    const data = await res.json();
+    
+    if(data.error) {
+      resDiv.innerHTML = `<div class="panel" style="color:red">${data.error}</div>`;
+      return;
+    }
+    
+    renderTrackerResults(data);
+    loadTrackedProducts(); // Refresh list
+  } catch(e) {
+    resDiv.innerHTML = `<div class="panel" style="color:red">API Error: Make sure backend is running.</div>`;
+  }
+}
+
+function renderTrackerResults(data) {
+  const me = data.target_product;
+  const matches = data.matches;
+  
+  let l1 = matches[0];
+  let isL1 = false;
+  if(l1 && l1.product_id === me.product_id) {
+    isL1 = true;
+    l1 = matches.length > 1 ? matches[1] : null; // If I am L1, show L2
+  }
+  
+  let html = `<div class="panel" style="margin-bottom:20px;">
+    <h3 style="margin-top:0">Specifications Locked ✓</h3>
+    <p style="color:var(--muted); font-size:13px; margin:0;">Found ${data.total_matches} products with the exact same specifications in the market.</p>
+  </div>
+  <div class="vs-board">`;
+  
+  // My Card
+  const myPrice = getPriceNum(me);
+  html += `
+    <div class="vs-card me ${isL1 ? 'win' : ''}">
+      <div class="vs-badge" style="background:${isL1 ? 'var(--l1-green)' : 'var(--blue)'}">YOUR PRODUCT ${isL1 ? '(YOU ARE L1! 🏆)' : ''}</div>
+      <h3>My Rate</h3>
+      <div class="vs-price">₹${myPrice.toLocaleString()}</div>
+      <div class="vs-title">${me.title}</div>
+      <div style="font-size:12px; color:var(--muted)">Product ID: ${me.product_id}</div>
+    </div>
+  `;
+  
+  // Competitor Card
+  if(l1) {
+    const l1Price = getPriceNum(l1);
+    const diff = myPrice - l1Price;
+    
+    html += `
+      <div class="vs-card ${!isL1 ? 'l1' : ''}">
+        <div class="vs-badge" style="${!isL1 ? 'background:var(--danger)' : 'background:var(--muted)'}">${!isL1 ? 'CURRENT L1 (UNDERCUTTING YOU)' : 'NEAREST COMPETITOR (L2)'}</div>
+        <h3>${!isL1 ? 'Competitor Rate' : 'Their Rate'}</h3>
+        <div class="vs-price" style="${!isL1 ? 'color:var(--danger)' : ''}">₹${l1Price.toLocaleString()}</div>
+        <div class="vs-title">${l1.title}</div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">Product ID: ${l1.product_id}</div>
+        ${!isL1 ? `<div style="color:var(--danger); font-weight:bold;">They are cheaper by ₹${diff.toLocaleString()}!</div>` : `<div style="color:var(--l1-green); font-weight:bold;">You are cheaper by ₹${(-diff).toLocaleString()}!</div>`}
+      </div>
+    `;
+  } else {
+    html += `<div class="vs-card"><div style="padding:40px; color:var(--muted);">No other competitors found with these exact specifications.</div></div>`;
+  }
+  
+  html += `</div>`;
+  document.getElementById('trackerResults').innerHTML = html;
+}
+
+function getPriceNum(p) {
+  let pr = p.L1_Price;
+  if(!pr) pr = p.price || "0";
+  return parseFloat(String(pr).replace(/,/g, '').replace('₹', ''));
+}
+
+async function loadTrackedProducts() {
+  try {
+    const res = await fetch('http://localhost:8000/getTrackedProducts');
+    const data = await res.json();
+    
+    const list = document.getElementById('trackedList');
+    if(Object.keys(data).length === 0) {
+      list.innerHTML = '<div style="padding:20px; color:var(--muted); text-align:center;">No products being tracked yet.</div>';
+      return;
+    }
+    
+    let html = '';
+    for(let pid in data) {
+      const p = data[pid];
+      html += `
+        <div class="tracker-row">
+          <div style="flex:1">
+            <strong>${pid}</strong>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">Tracking since: ${new Date(p.added_at * 1000).toLocaleString()}</div>
+          </div>
+          <div style="flex:1; text-align:center;"><strong style="color:var(--blue)">My Price: ₹${p.my_price.toLocaleString()}</strong></div>
+          <div style="flex:1; text-align:right;">
+             <button onclick="removeTracked('${pid}')" style="background:var(--danger); color:#fff; border:0; padding:6px 12px; border-radius:4px; cursor:pointer;">Stop Tracking</button>
+          </div>
+        </div>
+      `;
+    }
+    list.innerHTML = html;
+  } catch(e) {}
+}
+
+async function removeTracked(pid) {
+  if(!confirm('Stop tracking this product?')) return;
+  await fetch('http://localhost:8000/removeTrackedProduct', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ product_id: pid, client_email: document.getElementById('trackClientEmail').value.trim() })
+  });
+  loadTrackedProducts();
+}
+
+</script>
+</body>
+</html>
