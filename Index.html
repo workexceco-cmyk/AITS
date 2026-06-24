@@ -4348,11 +4348,41 @@
         </table>
         <p>${action}</p>
         <p style="font-size:12px; color:#888;">Locked Specs: ${Object.keys(c.lockedSpecs).length} specs tracked.</p>
+        <div style="margin-top:15px; text-align:center;">
+          <button onclick="sendRealTestEmail('${c.caseId}')" class="t-btn btn-lock" id="btnSendTestEmail" style="width:100%; padding:10px; font-size:14px; background-color: var(--blue); border: none; color: white; border-radius: 4px; cursor: pointer;">📧 Send This Test Email To Me Now</button>
+        </div>
       </div>
     `;
     
     document.getElementById('modalBody').innerHTML = html;
     document.getElementById('modal').classList.add('open');
+  }
+
+  async function sendRealTestEmail(caseId) {
+    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    let c = cases.find(x => x.caseId === caseId);
+    if(!c || !c.email) return alert("No email configured for this case!");
+    
+    let btn = document.getElementById('btnSendTestEmail');
+    let oldText = btn.innerText;
+    btn.innerText = "Sending... Please wait";
+    btn.disabled = true;
+    
+    try {
+      let res = await fetch(GAS_API_URL + '/sendTestAlert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+        body: JSON.stringify({ email: c.email, productId: c.productId, title: c.refTitle, myPrice: c.refPrice, l1Price: c.l1Price })
+      });
+      let data = await res.json();
+      if(data.error) throw new Error(data.error);
+      alert("✅ " + data.message + "\n\nPlease check your inbox (and spam folder) for " + c.email);
+    } catch(e) {
+      alert("❌ Failed to send email: " + e.message + "\n\nPlease ensure Start_Local_Database.bat is running.");
+    } finally {
+      btn.innerText = oldText;
+      btn.disabled = false;
+    }
   }
 
   async function removeTracked(caseId) {
