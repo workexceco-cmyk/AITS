@@ -2301,7 +2301,14 @@
       const rawPrice = p.price || p.offer_price || p.selling_price || p.current_price || getSmartVal(p, ['price', 'offer']);
       const rawMrp = p.mrp || p.maximum_retail_price || p.original_price || getSmartVal(p, ['mrp', 'retail', 'original']);
       const rawStock = p.stock || p.inventory || p.quantity || p.stock_status || getSmartVal(p, ['stock', 'qty', 'quantity']);
-      const rawBrand = p.brand || p.brand_name || p.manufacturer || getSmartVal(p, ['brand', 'make']);
+      let rawBrand = p.brand || p.brand_name || p.manufacturer || getSmartVal(p, ['brand', 'make']);
+        if(typeof rawBrand === 'string') {
+            rawBrand = rawBrand.trim()
+                .replace(/(?:®|™|\s+[rR]|\s+(?:tm|TM)|\s+(?:ur|UR))$/, '')
+                .replace(/([a-z])(?:UR|TM)$/, '$1')
+                .replace(/(?:\s*Unregistered\s*Brand\s*)$/i, '')
+                .trim();
+        }
       const rawSeller = p.seller || p.vendor || p.seller_name || getSmartVal(p, ['seller', 'vendor']);
       const rawImg = p.image_url || p.img_url || p.image || p.img || p.picture || p.thumbnail || getSmartVal(p, ['image', 'img', 'pic', 'thumb']);
       const rawId = p.product_id || p.id || p.item_id || p.sku || getSmartVal(p, ['id', 'sku']);
