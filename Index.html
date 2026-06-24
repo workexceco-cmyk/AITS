@@ -4348,7 +4348,7 @@
           <tr><td style="padding:8px; border:1px solid #eee;">Difference:</td><td style="padding:8px; border:1px solid #eee;">₹${diff.toLocaleString()}</td></tr>
         </table>
         <p>${action}</p>
-        <p style="font-size:12px; color:#888;">Locked Specs: ${Object.keys(c.lockedSpecs).length} specs tracked.</p>
+        <p style="font-size:12px; color:#888;">Locked Specs: ${c.lockedSpecs ? Object.keys(c.lockedSpecs).length : 0} specs tracked.</p>
         <div style="margin-top:15px; text-align:center;">
           <button onclick="sendRealTestEmail('${c.caseId}')" class="t-btn btn-lock" id="btnSendTestEmail" style="width:100%; padding:10px; font-size:14px; background-color: var(--blue); border: none; color: white; border-radius: 4px; cursor: pointer;">📧 Send This Test Email To Me Now</button>
         </div>
