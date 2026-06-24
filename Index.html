@@ -2112,9 +2112,12 @@
     }
 
     function sortCategoryList(list){
-      const productSort = document.getElementById("categoryProductSort")?.value || "PRODUCTS_ASC";
-      const nameSort = document.getElementById("categoryNameSort")?.value || "NAME_ASC";
-      const updatedSort = document.getElementById("categoryUpdatedSort")?.value || "UPDATED_ASC";
+      let e1 = document.getElementById("categoryProductSort");
+      let e2 = document.getElementById("categoryNameSort");
+      let e3 = document.getElementById("categoryUpdatedSort");
+      const productSort = (e1 && e1.value) ? e1.value : "PRODUCTS_ASC";
+      const nameSort = (e2 && e2.value) ? e2.value : "NAME_ASC";
+      const updatedSort = (e3 && e3.value) ? e3.value : "UPDATED_ASC";
       const out = [...list];
 
       out.sort(function(a,b){
@@ -3613,10 +3616,10 @@
     }
 
     function parseStockQty(v){
-      if(!isMeaningful(v)) return null;
       const s = String(v).toLowerCase();
       if(/out\s*of\s*stock|not\s*available/.test(s)) return 0;
-      const n = parseFloat(s.replace(/,/g,"").match(/\d+(?:\.\d+)?/)?.[0] || "");
+      let m = s.replace(/,/g,"").match(/\d+(?:\.\d+)?/);
+      const n = parseFloat(m ? m[0] : "");
       if(!isNaN(n)) return n;
       if(/in\s*stock|available/.test(s)) return 1;
       return null;
@@ -3779,7 +3782,7 @@
     }
 
     function esc(v){
-      return String(v ?? "")
+      return String((v !== null && v !== undefined) ? v : "")
         .replace(/&/g,"&amp;")
         .replace(/</g,"&lt;")
         .replace(/>/g,"&gt;")
