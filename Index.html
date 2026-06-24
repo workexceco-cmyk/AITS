@@ -1586,15 +1586,48 @@
     .tracker-row { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee; align-items:center; }
     .tracker-row:last-child { border:0; }
 
+  
+    /* New Tracker Dashboard CSS */
+    .tracker-dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .t-card { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--line); text-align: center; }
+    .t-card h3 { font-size: 14px; color: var(--muted); margin: 0 0 10px 0; }
+    .t-card .t-val { font-size: 28px; font-weight: 900; color: var(--blue); }
+    
+    .tracker-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #fff; padding: 20px; border: 1px solid var(--line); border-radius: 8px; }
+    .t-group { display: flex; flex-direction: column; gap: 5px; }
+    .t-group label { font-size: 13px; font-weight: bold; color: var(--dark); }
+    .t-group input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    .t-full { grid-column: 1 / -1; }
+    
+    .t-btn-group { display: flex; gap: 10px; margin-top: 15px; grid-column: 1 / -1; }
+    .t-btn { padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; border: none; }
+    .btn-find { background: var(--blue); color: #fff; }
+    .btn-lock { background: var(--warning); color: #000; }
+    .btn-start { background: var(--green); color: #fff; }
+    .btn-clear { background: #eee; color: #333; }
+    
+    .spec-checklist { max-height: 250px; overflow-y: auto; background: #f9f9f9; padding: 15px; border: 1px solid #eee; border-radius: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .spec-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    
+    .t-table-wrap { overflow-x: auto; margin-top: 20px; border: 1px solid var(--line); border-radius: 8px; }
+    .t-table { width: 100%; border-collapse: collapse; text-align: left; background: #fff; }
+    .t-table th { background: #f5f5f5; padding: 12px 15px; font-size: 13px; color: var(--muted); border-bottom: 2px solid var(--line); }
+    .t-table td { padding: 12px 15px; font-size: 14px; border-bottom: 1px solid var(--line); }
+    .t-status { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .t-status.l1 { background: #d4edda; color: #155724; }
+    .t-status.lost { background: #f8d7da; color: #721c24; }
+    .t-action-btn { background: none; border: none; color: var(--blue); cursor: pointer; font-size: 13px; text-decoration: underline; margin-right: 10px; }
+    .t-action-btn.danger { color: var(--danger); }
+
   </style>
 <body>
 <header class="topbar">
     <div class="topbar-inner">
       <div class="logo" style="display:flex; align-items:center; gap: 15px; text-align: left;">
         <button id="topbarBackBtn" class="back-btn hidden" onclick="backToCategories()" style="padding: 6px 12px; font-size: 13px; box-shadow: none;">← Back</button>
-        <div>
-         LowestBid AI<br>
-          <small>Advanced GeM Comparison Portal</small>
+        <div style="font-size: 24px; font-weight: 900; letter-spacing: 1px;">
+         AITS<br>
+          <small style="font-size: 14px; letter-spacing: 2px;">.....</small>
         </div>
       </div>
 
@@ -1610,27 +1643,87 @@
 
   <main class="wrap">
     
-      <section id="trackerView" class="hidden">
-        <div class="panel" style="margin-bottom:20px;">
-          <h2>L1 Competitor Tracker (Head-to-Head)</h2>
-          <p style="color:var(--muted)">Enter your Product ID. The system will lock the exact specifications and monitor the market to alert you if someone undercuts your price.</p>
-          <div style="display:flex; gap:10px; margin-top:15px;">
-            <input type="text" id="trackProductIdInput" placeholder="Enter Product ID" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:4px; font-size:15px;">
-            <input type="email" id="trackClientEmail" placeholder="Client's Email ID (For Alerts)" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:4px; font-size:15px;">
-            <button onclick="startTracking()" class="primary-btn" style="border-radius:4px;">Lock & Track</button>
+              <section id="trackerView" class="hidden">
+          <div id="trackerModeLabel"></div>
+          
+          <div class="tracker-dash-grid">
+            <div class="t-card"><h3>Total Active Cases</h3><div class="t-val" id="tStatsCases">0</div></div>
+            <div class="t-card"><h3>You are L1</h3><div class="t-val" id="tStatsL1" style="color:var(--green)">0</div></div>
+            <div class="t-card"><h3>L1 Lost (Alerts)</h3><div class="t-val" id="tStatsLost" style="color:var(--danger)">0</div></div>
+            <div class="t-card"><h3>Products Tracked</h3><div class="t-val" id="tStatsProducts">0</div></div>
           </div>
-        </div>
-        
-        <div id="trackerResults"></div>
-        
-        <div class="panel mt-3">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3>Currently Tracked Products (Auto 24/7 Monitoring)</h3>
-            <button class="primary-btn" style="padding:6px 12px; font-size:13px;" onclick="loadTrackedProducts()">Refresh List</button>
+
+          <div class="tracker-form">
+            <div class="t-full" style="border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
+              <h2 style="margin:0;">Create L1 Tracking Case</h2>
+              <p style="color:var(--muted); font-size:13px; margin:5px 0 0 0;">Enter a Product ID to find the reference product and lock exact specifications for market monitoring.</p>
+            </div>
+            
+            <div class="t-group">
+              <label>Reference Product ID *</label>
+              <input type="text" id="tInputPid" placeholder="e.g. 5116877-98444455555">
+            </div>
+            <div class="t-group">
+              <label>Customer Name</label>
+              <input type="text" id="tInputCustomer" placeholder="Client or Buyer Name">
+            </div>
+            <div class="t-group">
+              <label>Customer Email * (For Alerts)</label>
+              <input type="email" id="tInputEmail" placeholder="client@example.com">
+            </div>
+            <div class="t-group">
+              <label>WhatsApp Number</label>
+              <input type="text" id="tInputPhone" placeholder="Optional">
+            </div>
+            <div class="t-group">
+              <label>Your Brand Name</label>
+              <input type="text" id="tInputBrand" placeholder="To identify your products">
+            </div>
+            <div class="t-group">
+              <label>Min. Acceptable Price (₹)</label>
+              <input type="number" id="tInputMinPrice" placeholder="Do not go below this price">
+            </div>
+            <div class="t-group t-full">
+              <label>Notes / Remarks</label>
+              <input type="text" id="tInputNotes" placeholder="Any internal notes">
+            </div>
+
+            <div class="t-btn-group">
+              <button class="t-btn btn-find" onclick="findTrackerProduct()">1. Find Product</button>
+              <button class="t-btn btn-lock" id="btnLockSpecs" onclick="lockTrackerSpecs()" style="display:none;">2. Lock Specs</button>
+              <button class="t-btn btn-start" id="btnStartTrack" onclick="startTracking()" style="display:none;">3. Start Tracking</button>
+              <button class="t-btn btn-clear" onclick="clearTrackerForm()">Clear</button>
+            </div>
           </div>
-          <div id="trackedList" style="margin-top:15px; border:1px solid var(--line); border-radius:4px;"></div>
-        </div>
-      </section>
+
+          <div id="trackerResults" style="margin-top:20px;"></div>
+
+          <div class="panel mt-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+              <h3>Tracker Dashboard (Auto 24/7 Monitoring)</h3>
+              <button class="primary-btn" style="padding:6px 12px; font-size:13px;" onclick="loadTrackedProducts()">Refresh Board</button>
+            </div>
+            <div class="t-table-wrap">
+              <table class="t-table">
+                <thead>
+                  <tr>
+                    <th>Case No.</th>
+                    <th>Customer</th>
+                    <th>Product ID</th>
+                    <th>Your Price</th>
+                    <th>Current L1 Price</th>
+                    <th>Status</th>
+                    <th>Last Checked</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="trackedListBody">
+                  <!-- Cases render here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
       <section class="hero">
       <div>
@@ -3464,7 +3557,7 @@
     };
 
       function showOnly(id){
-        ["categoryView","productView"].forEach(x => {
+        ["categoryView","productView","trackerView"].forEach(x => {
           document.getElementById(x).classList.toggle("hidden", x !== id);
         });
         if(id === "productView") {
@@ -3823,139 +3916,461 @@
     }
   
 // Tracker Logic
-function openTrackerMode() {
-  document.querySelector('.hero').classList.add('hidden');
-  document.getElementById('categoryView').classList.add('hidden');
-  document.getElementById('productView').classList.add('hidden');
-  document.getElementById('trackerView').classList.remove('hidden');
-  loadTrackedProducts();
-}
+  let currentTrackerRefProduct = null;
+  let currentLockedSpecs = null;
 
-async function startTracking() {
-  const pid = document.getElementById('trackProductIdInput').value.trim();
-  if(!pid) return alert('Please enter a Product ID');
-  
-  const resDiv = document.getElementById('trackerResults');
-  resDiv.innerHTML = '<div class="panel loader">Locking specifications and searching market...</div>';
-  
-  try {
-    const res = await fetch('http://localhost:8000/trackProduct', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product_id: pid, client_email: document.getElementById('trackClientEmail').value.trim() })
-    });
-    const data = await res.json();
+  function openTrackerMode() {
+    document.querySelector('.hero').classList.add('hidden');
+    document.getElementById('categoryView').classList.add('hidden');
+    document.getElementById('productView').classList.add('hidden');
+    document.getElementById('trackerView').classList.remove('hidden');
+    loadTrackedProducts();
+  }
+
+  function clearTrackerForm() {
+    document.getElementById('tInputPid').value = '';
+    document.getElementById('tInputCustomer').value = '';
+    document.getElementById('tInputEmail').value = '';
+    document.getElementById('tInputPhone').value = '';
+    document.getElementById('tInputBrand').value = '';
+    document.getElementById('tInputMinPrice').value = '';
+    document.getElementById('tInputNotes').value = '';
+    document.getElementById('trackerResults').innerHTML = '';
+    document.getElementById('btnLockSpecs').style.display = 'none';
+    document.getElementById('btnStartTrack').style.display = 'none';
+    currentTrackerRefProduct = null;
+    currentLockedSpecs = null;
+  }
+
+  async function findTrackerProduct() {
+    const pid = document.getElementById('tInputPid').value.trim();
+    if(!pid) return showToast("Please enter a Product ID", "error");
     
-    if(data.error) {
-      resDiv.innerHTML = `<div class="panel" style="color:red">${data.error}</div>`;
+    document.getElementById('trackerResults').innerHTML = '<div class="panel loader">Searching for product...</div>';
+
+    let p = null;
+
+    // Search 1: Currently loaded window.products
+    if(window.products && window.products.length > 0) {
+      p = window.products.find(x => String(x.product_id) === pid);
+    }
+
+    // Search 2 & 3: Try backend API if not in window.products
+    if(!p) {
+       try {
+         let res = await fetch(GAS_API_URL + '/api/product/' + pid, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+         if(res.ok) {
+           let data = await res.json();
+           if(data && data.product_id) p = data;
+         }
+       } catch(e) {
+         console.log("Backend product search failed", e);
+       }
+    }
+
+    if(!p) {
+      document.getElementById('trackerResults').innerHTML = `<div class="panel" style="color:var(--danger); font-weight:bold;">Product ID not found in synced data. Please sync category data first.</div>`;
       return;
     }
-    
-    renderTrackerResults(data);
-    loadTrackedProducts(); // Refresh list
-  } catch(e) {
-    resDiv.innerHTML = `<div class="panel" style="color:red">API Error: Make sure backend is running.</div>`;
-  }
-}
 
-function renderTrackerResults(data) {
-  const me = data.target_product;
-  const matches = data.matches;
-  
-  let l1 = matches[0];
-  let isL1 = false;
-  if(l1 && l1.product_id === me.product_id) {
-    isL1 = true;
-    l1 = matches.length > 1 ? matches[1] : null; // If I am L1, show L2
+    currentTrackerRefProduct = p;
+    renderTrackerReferenceProduct(p);
   }
-  
-  let html = `<div class="panel" style="margin-bottom:20px;">
-    <h3 style="margin-top:0">Specifications Locked ✓</h3>
-    <p style="color:var(--muted); font-size:13px; margin:0;">Found ${data.total_matches} products with the exact same specifications in the market.</p>
-  </div>
-  <div class="vs-board">`;
-  
-  // My Card
-  const myPrice = getPriceNum(me);
-  html += `
-    <div class="vs-card me ${isL1 ? 'win' : ''}">
-      <div class="vs-badge" style="background:${isL1 ? 'var(--l1-green)' : 'var(--blue)'}">YOUR PRODUCT ${isL1 ? '(YOU ARE L1! 🏆)' : ''}</div>
-      <h3>My Rate</h3>
-      <div class="vs-price">₹${myPrice.toLocaleString()}</div>
-      <div class="vs-title">${me.title}</div>
-      <div style="font-size:12px; color:var(--muted)">Product ID: ${me.product_id}</div>
-    </div>
-  `;
-  
-  // Competitor Card
-  if(l1) {
-    const l1Price = getPriceNum(l1);
-    const diff = myPrice - l1Price;
-    
-    html += `
-      <div class="vs-card ${!isL1 ? 'l1' : ''}">
-        <div class="vs-badge" style="${!isL1 ? 'background:var(--danger)' : 'background:var(--muted)'}">${!isL1 ? 'CURRENT L1 (UNDERCUTTING YOU)' : 'NEAREST COMPETITOR (L2)'}</div>
-        <h3>${!isL1 ? 'Competitor Rate' : 'Their Rate'}</h3>
-        <div class="vs-price" style="${!isL1 ? 'color:var(--danger)' : ''}">₹${l1Price.toLocaleString()}</div>
-        <div class="vs-title">${l1.title}</div>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">Product ID: ${l1.product_id}</div>
-        ${!isL1 ? `<div style="color:var(--danger); font-weight:bold;">They are cheaper by ₹${diff.toLocaleString()}!</div>` : `<div style="color:var(--l1-green); font-weight:bold;">You are cheaper by ₹${(-diff).toLocaleString()}!</div>`}
+
+  function renderTrackerReferenceProduct(p) {
+    let specs = p.raw_specs || {};
+    if(Object.keys(specs).length === 0 && p.all_specifications_and_details) {
+       specs = p.all_specifications_and_details;
+    }
+
+    let specsHtml = renderTrackerSpecChecklist(specs);
+
+    document.getElementById('trackerResults').innerHTML = `
+      <div class="panel">
+        <h3 style="margin-top:0; color:var(--blue);">Reference Product Found</h3>
+        <div style="background:#f5f5f5; padding:15px; border-radius:4px; margin-bottom:15px; font-size:14px;">
+          <b>Title:</b> ${esc(p.title)}<br>
+          <b>Brand:</b> ${esc(p.brand)} | <b>Category:</b> ${esc(p.category && p.category.name ? p.category.name : p.category)}<br>
+          <b>Current Price:</b> ₹${getPriceNum(p).toLocaleString()} | <b>Seller:</b> ${esc(p.seller)}
+        </div>
+        <h4>Select Specifications to Lock for Matching:</h4>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Uncheck specs that should NOT be strictly matched against competitors.</p>
+        ${specsHtml}
       </div>
     `;
-  } else {
-    html += `<div class="vs-card"><div style="padding:40px; color:var(--muted);">No other competitors found with these exact specifications.</div></div>`;
+
+    document.getElementById('btnLockSpecs').style.display = 'block';
+    document.getElementById('btnStartTrack').style.display = 'none';
   }
-  
-  html += `</div>`;
-  document.getElementById('trackerResults').innerHTML = html;
-}
 
-function getPriceNum(p) {
-  let pr = p.L1_Price;
-  if(!pr) pr = p.price || "0";
-  return parseFloat(String(pr).replace(/,/g, '').replace('₹', ''));
-}
+  function renderTrackerSpecChecklist(specs) {
+    let html = '<div class="spec-checklist">';
+    for(let k in specs) {
+       if(!specs[k] || specs[k]==="NA") continue;
+       html += `
+         <label class="spec-item">
+           <input type="checkbox" class="t-spec-cb" value="${esc(k)}" checked>
+           <span><b>${esc(k)}</b>: ${esc(specs[k])}</span>
+         </label>
+       `;
+    }
+    html += '</div>';
+    return html;
+  }
 
-async function loadTrackedProducts() {
-  try {
-    const res = await fetch('http://localhost:8000/getTrackedProducts');
-    const data = await res.json();
+  function lockTrackerSpecs() {
+    if(!currentTrackerRefProduct) return;
     
-    const list = document.getElementById('trackedList');
-    if(Object.keys(data).length === 0) {
-      list.innerHTML = '<div style="padding:20px; color:var(--muted); text-align:center;">No products being tracked yet.</div>';
+    const checkboxes = document.querySelectorAll('.t-spec-cb');
+    let locked = {};
+    let count = 0;
+    
+    let specs = currentTrackerRefProduct.raw_specs || currentTrackerRefProduct.all_specifications_and_details || {};
+
+    checkboxes.forEach(cb => {
+      if(cb.checked) {
+        locked[cb.value] = specs[cb.value];
+        count++;
+      }
+    });
+
+    currentLockedSpecs = locked;
+
+    document.getElementById('trackerResults').innerHTML = `
+      <div class="panel" style="border:2px solid var(--warning);">
+        <h3 style="margin-top:0;">Locked Specs Preview 🔒</h3>
+        <p style="font-size:13px; color:var(--muted);">These ${count} specifications are frozen for market comparison.</p>
+        <div style="background:#fffcf0; padding:15px; border-radius:4px; border:1px solid #ffeeba; font-size:13px; max-height:200px; overflow-y:auto;">
+          ${Object.keys(locked).map(k => `<div><b>${esc(k)}</b>: ${esc(locked[k])}</div>`).join("")}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btnLockSpecs').style.display = 'none';
+    document.getElementById('btnStartTrack').style.display = 'block';
+    showToast("Specifications Locked Successfully!", "success");
+  }
+
+  function createTrackerCase() {
+    const email = document.getElementById('tInputEmail').value.trim();
+    if(!email) { showToast("Customer Email is required for alerts.", "error"); return null; }
+
+    return {
+      caseId: "CASE-" + Math.floor(1000 + Math.random() * 9000),
+      customerName: document.getElementById('tInputCustomer').value.trim(),
+      email: email,
+      phone: document.getElementById('tInputPhone').value.trim(),
+      brand: document.getElementById('tInputBrand').value.trim(),
+      minPrice: parseFloat(document.getElementById('tInputMinPrice').value) || 0,
+      notes: document.getElementById('tInputNotes').value.trim(),
+      productId: currentTrackerRefProduct.product_id,
+      category: currentTrackerRefProduct.category && currentTrackerRefProduct.category.name ? currentTrackerRefProduct.category.name : currentTrackerRefProduct.category,
+      refTitle: currentTrackerRefProduct.title,
+      refPrice: getPriceNum(currentTrackerRefProduct),
+      refSeller: currentTrackerRefProduct.seller,
+      lockedSpecs: currentLockedSpecs,
+      status: "Active",
+      l1Status: "Unknown",
+      l1Price: 0,
+      createdAt: new Date().getTime(),
+      lastChecked: new Date().getTime()
+    };
+  }
+
+  async function saveTrackerCase(newCase) {
+    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    cases.push(newCase);
+    localStorage.setItem('gem_tracker_cases', JSON.stringify(cases));
+
+    try {
+      await fetch(GAS_API_URL + '/trackProduct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+        body: JSON.stringify({ product_id: newCase.productId, client_email: newCase.email })
+      });
+    } catch(e) {
+      console.warn("Backend local_api not reachable, case saved to localStorage only.");
+    }
+  }
+
+  async function startTracking() {
+    if(!currentTrackerRefProduct || !currentLockedSpecs) return;
+    
+    let newCase = createTrackerCase();
+    if(!newCase) return;
+
+    await saveTrackerCase(newCase);
+
+    clearTrackerForm();
+    showToast("Tracking Case Created: " + newCase.caseId, "success");
+    loadTrackedProducts();
+    
+    recheckTrackerCase(newCase.caseId, true);
+  }
+
+  function getPriceNum(p) {
+    let pr = p.L1_Price || p.price || "0";
+    if(typeof pr === 'string') pr = pr.replace(/[^0-9.]/g, '');
+    return parseFloat(pr) || 0;
+  }
+
+  function renderTrackerResults(data) {
+     // Kept for backward compatibility
+  }
+
+  async function loadTrackedProducts() {
+    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    let backendData = null;
+
+    try {
+      let res = await fetch(GAS_API_URL + '/getTrackedProducts', { headers: { 'ngrok-skip-browser-warning': 'true' } });
+      if(res.ok) {
+        backendData = await res.json();
+        document.getElementById('trackerModeLabel').innerHTML = ''; // Clear fallback label
+      } else {
+        throw new Error("Failed to load from backend");
+      }
+    } catch(e) {
+      document.getElementById('trackerModeLabel').innerHTML = '<div style="background:#fff3cd; color:#856404; padding:10px; border-radius:4px; margin-bottom:15px; font-size:14px; border:1px solid #ffeeba;"><b>Local Test Mode:</b> Backend API not reachable. Cases stored in browser only.</div>';
+    }
+
+    renderTrackerDashboard(cases, backendData);
+  }
+
+  function renderTrackerDashboard(cases, backendData) {
+    const tbody = document.getElementById('trackedListBody');
+    if(!tbody) return;
+
+    let activeCount = 0;
+    let l1Count = 0;
+    let lostCount = 0;
+
+    if(cases.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--muted); padding:20px;">No tracking cases found.</td></tr>';
+      document.getElementById('tStatsCases').innerText = 0;
+      document.getElementById('tStatsL1').innerText = 0;
+      document.getElementById('tStatsLost').innerText = 0;
+      document.getElementById('tStatsProducts').innerText = 0;
       return;
     }
-    
-    let html = '';
-    for(let pid in data) {
-      const p = data[pid];
-      html += `
-        <div class="tracker-row">
-          <div style="flex:1">
-            <strong>${pid}</strong>
-            <div style="font-size:12px; color:var(--muted); margin-top:4px;">Tracking since: ${new Date(p.added_at * 1000).toLocaleString()}</div>
-          </div>
-          <div style="flex:1; text-align:center;"><strong style="color:var(--blue)">My Price: ₹${p.my_price.toLocaleString()}</strong></div>
-          <div style="flex:1; text-align:right;">
-             <button onclick="removeTracked('${pid}')" style="background:var(--danger); color:#fff; border:0; padding:6px 12px; border-radius:4px; cursor:pointer;">Stop Tracking</button>
-          </div>
-        </div>
-      `;
-    }
-    list.innerHTML = html;
-  } catch(e) {}
-}
 
-async function removeTracked(pid) {
-  if(!confirm('Stop tracking this product?')) return;
-  await fetch('http://localhost:8000/removeTrackedProduct', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ product_id: pid, client_email: document.getElementById('trackClientEmail').value.trim() })
-  });
-  loadTrackedProducts();
-}
+    let html = '';
+    cases.forEach(c => {
+      // If backend data is available, enrich our view
+      if(backendData && backendData[c.productId]) {
+         c.status = "Active";
+         let bData = backendData[c.productId];
+         // Backend tracks price
+         if(bData.l1_price) c.l1Price = bData.l1_price;
+      }
+
+      if(c.status !== "Stopped") activeCount++;
+      if(c.l1Status === "You are L1") l1Count++;
+      if(c.l1Status === "You are not L1") lostCount++;
+
+      let statusBadge = c.status === "Stopped" ? `<span class="t-status">Stopped</span>` : 
+                       (c.l1Status === "You are L1" ? `<span class="t-status l1">You are L1</span>` : 
+                       (c.l1Status === "You are not L1" ? `<span class="t-status lost">Not L1</span>` : `<span class="t-status">Pending</span>`));
+
+      html += `
+        <tr>
+          <td><b>${c.caseId}</b></td>
+          <td>${esc(c.customerName || 'N/A')}<br><small style="color:var(--muted)">${esc(c.email)}</small></td>
+          <td>${c.productId}</td>
+          <td>₹${c.refPrice.toLocaleString()}</td>
+          <td style="font-weight:bold; color:${c.l1Status === 'You are not L1' ? 'var(--danger)' : 'var(--dark)'}">₹${c.l1Price.toLocaleString()}</td>
+          <td>${statusBadge}</td>
+          <td style="font-size:12px; color:var(--muted)">${new Date(c.lastChecked).toLocaleString()}</td>
+          <td>
+            <button class="t-action-btn" onclick="viewTrackerCase('${c.caseId}')">View</button>
+            <button class="t-action-btn" onclick="recheckTrackerCase('${c.caseId}')">Recheck</button>
+            <button class="t-action-btn danger" onclick="removeTracked('${c.caseId}')">Stop</button>
+            <button class="t-action-btn" onclick="sendTrackerAlertPreview('${c.caseId}')">Test Alert</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+    
+    document.getElementById('tStatsCases').innerText = activeCount;
+    document.getElementById('tStatsL1').innerText = l1Count;
+    document.getElementById('tStatsLost').innerText = lostCount;
+    document.getElementById('tStatsProducts').innerText = [...new Set(cases.map(c=>c.productId))].length;
+  }
+
+  async function recheckTrackerCase(caseId, silent = false) {
+    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    let idx = cases.findIndex(c => c.caseId === caseId);
+    if(idx === -1) return;
+    let c = cases[idx];
+
+    let checkProducts = window.products || [];
+    
+    // If not loaded or wrong category, fetch from backend
+    let currentCat = checkProducts.length > 0 ? (checkProducts[0].category && checkProducts[0].category.name ? checkProducts[0].category.name : checkProducts[0].category) : "";
+    if(currentCat !== c.category) {
+       try {
+         let res = await fetch(GAS_API_URL + '/getCategoryProducts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+            body: JSON.stringify({ category: c.category })
+         });
+         if(res.ok) {
+           let data = await res.json();
+           if(data && data.products) checkProducts = data.products;
+         }
+       } catch(e) {
+         console.warn("Failed to fetch category products from backend for recheck", e);
+       }
+    }
+
+    if(checkProducts.length === 0) {
+      if(!silent) showToast("Could not load products to recheck.", "error");
+      return;
+    }
+
+    const categoryMatches = checkProducts.filter(p => {
+       let catName = p.category && p.category.name ? p.category.name : p.category;
+       return catName === c.category;
+    });
+
+    let exactMatches = categoryMatches.filter(p => {
+      let pSpecs = p.raw_specs || p.all_specifications_and_details || {};
+      for(let k in c.lockedSpecs) {
+         if(!pSpecs[k] || normalizeText(pSpecs[k]) !== normalizeText(c.lockedSpecs[k])) return false;
+      }
+      return true;
+    });
+
+    exactMatches.sort((a,b) => getPriceNum(a) - getPriceNum(b));
+
+    if(exactMatches.length > 0) {
+      let currentL1 = exactMatches[0];
+      c.l1Price = getPriceNum(currentL1);
+      
+      if(currentL1.product_id === c.productId) {
+         c.l1Status = "You are L1";
+      } else {
+         c.l1Status = "You are not L1";
+      }
+      c.currentL1Id = currentL1.product_id;
+      c.currentL1Seller = currentL1.seller;
+    }
+
+    c.lastChecked = new Date().getTime();
+    cases[idx] = c;
+    localStorage.setItem('gem_tracker_cases', JSON.stringify(cases));
+    
+    if(!silent) showToast(c.caseId + " rechecked successfully!", "success");
+    loadTrackedProducts();
+  }
+
+        async function viewTrackerCase(caseId) {
+    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    let c = cases.find(x => x.caseId === caseId);
+    if(!c) return;
+    
+    let resDiv = document.getElementById('trackerResults');
+    resDiv.innerHTML = '<div class="panel loader">Generating Head-to-Head VS Comparison...</div>';
+    
+    // Smooth scroll to top to see the results
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    try {
+      let res = await fetch(GAS_API_URL + '/trackProduct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+        body: JSON.stringify({ product_id: c.productId, client_email: c.email })
+      });
+      let data = await res.json();
+      
+      if(data.error) {
+        resDiv.innerHTML = `<div class="panel" style="color:red">${data.error}</div>`;
+        return;
+      }
+      
+      let filteredMatches = [];
+      for(let match of data.matches) {
+         let isMatch = true;
+         for(let key in c.lockedSpecs) {
+            if(match.all_specifications_and_details && match.all_specifications_and_details[key] !== c.lockedSpecs[key]) {
+               isMatch = false; break;
+            }
+         }
+         if(isMatch) filteredMatches.push(match);
+      }
+      
+      data.matches = filteredMatches;
+      data.total_matches = filteredMatches.length;
+      
+      renderTrackerResults(data);
+    } catch(e) {
+      resDiv.innerHTML = `<div class="panel" style="color:red">API Error: Backend offline.</div>`;
+    }
+  }
+
+  function sendTrackerAlertPreview(caseId) {
+    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    let c = cases.find(x => x.caseId === caseId);
+    if(!c) return;
+
+    let subject = `L1 Alert: ${c.category} | ${c.brand} | New Lowest Price ₹${c.l1Price} | Your Price ₹${c.refPrice}`;
+    let diff = c.refPrice - c.l1Price;
+    
+    let action = "";
+    if(c.l1Price >= c.minPrice) {
+       action = `<span style="color:green; font-weight:bold;">Action Recommended: You can match or beat this by setting your price to ₹${(c.l1Price - 0.01).toFixed(2)}</span>`;
+    } else {
+       action = `<span style="color:red; font-weight:bold;">Warning: Below minimum acceptable price (₹${c.minPrice}). Review before reducing.</span>`;
+    }
+
+    let html = `
+      <div style="border:1px solid #ccc; padding:20px; border-radius:8px; font-family:sans-serif;">
+        <div style="border-bottom:2px solid var(--blue); padding-bottom:10px; margin-bottom:15px;">
+          <b>Subject:</b> ${esc(subject)}
+        </div>
+        <p>Hello ${esc(c.customerName)},</p>
+        <p>This is an automated alert from LowestBid AI Tracker.</p>
+        <p>You are no longer L1 for Product ID <b>${c.productId}</b>.</p>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+          <tr><td style="padding:8px; border:1px solid #eee;">Your Price:</td><td style="padding:8px; border:1px solid #eee; font-weight:bold;">₹${c.refPrice.toLocaleString()}</td></tr>
+          <tr><td style="padding:8px; border:1px solid #eee;">New L1 Price:</td><td style="padding:8px; border:1px solid #eee; font-weight:bold; color:red;">₹${c.l1Price.toLocaleString()}</td></tr>
+          <tr><td style="padding:8px; border:1px solid #eee;">New L1 Seller:</td><td style="padding:8px; border:1px solid #eee;">${esc(c.currentL1Seller || 'Unknown')}</td></tr>
+          <tr><td style="padding:8px; border:1px solid #eee;">Difference:</td><td style="padding:8px; border:1px solid #eee;">₹${diff.toLocaleString()}</td></tr>
+        </table>
+        <p>${action}</p>
+        <p style="font-size:12px; color:#888;">Locked Specs: ${Object.keys(c.lockedSpecs).length} specs tracked.</p>
+      </div>
+    `;
+    
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('modal').classList.add('open');
+  }
+
+  async function removeTracked(caseId) {
+    if(!confirm('Stop tracking this case?')) return;
+    
+    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    let idx = cases.findIndex(c => c.caseId === caseId);
+    if(idx !== -1) {
+       let pid = cases[idx].productId;
+       let email = cases[idx].email;
+       cases[idx].status = "Stopped";
+       localStorage.setItem('gem_tracker_cases', JSON.stringify(cases));
+       
+       try {
+         await fetch(GAS_API_URL + '/removeTrackedProduct', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+           body: JSON.stringify({ product_id: pid, client_email: email })
+         });
+       } catch(e) {}
+    }
+    
+    loadTrackedProducts();
+  }
+// End Tracker Logic
 
 </script>
 </body>
