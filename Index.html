@@ -4192,6 +4192,7 @@
             <button class="t-action-btn" onclick="viewTrackerCase('${c.caseId}')">View</button>
             <button class="t-action-btn" onclick="recheckTrackerCase('${c.caseId}')">Recheck</button>
             <button class="t-action-btn danger" onclick="removeTracked('${c.caseId}')">Stop</button>
+            <button class="t-action-btn danger" onclick="deleteTrackerCase('${c.caseId}')">Delete</button>
             <button class="t-action-btn" onclick="sendTrackerAlertPreview('${c.caseId}')">Test Alert</button>
           </td>
         </tr>
@@ -4403,9 +4404,36 @@
            body: JSON.stringify({ product_id: pid, client_email: email })
          });
        } catch(e) {}
+       
+       showToast("Tracking stopped", "info");
+       loadTrackedProducts();
     }
+  }
+
+  async function deleteTrackerCase(caseId) {
+    if(!confirm('Are you sure you want to completely DELETE this case? This action cannot be undone.')) return;
     
-    loadTrackedProducts();
+    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    let idx = cases.findIndex(c => c.caseId === caseId);
+    if(idx !== -1) {
+       let pid = cases[idx].productId;
+       let email = cases[idx].email;
+       // Remove from array
+       cases.splice(idx, 1);
+       localStorage.setItem('gem_tracker_cases', JSON.stringify(cases));
+       
+       // Also tell backend to stop tracking if it hasn't already
+       try {
+         await fetch(GAS_API_URL + '/removeTrackedProduct', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+           body: JSON.stringify({ product_id: pid, client_email: email })
+         });
+       } catch(e) {}
+       
+       showToast("Tracking case deleted", "info");
+       loadTrackedProducts();
+    }
   }
 // End Tracker Logic
 
