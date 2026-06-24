@@ -4369,12 +4369,13 @@
   }
 
   async function sendRealTestEmail(caseId) {
+    let btn = document.getElementById('btnSendTestEmail');
+    let oldText = btn.innerText;
+    
     let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
     let c = cases.find(x => x.caseId === caseId);
     if(!c || !c.email) return alert("No email configured for this case!");
     
-    let btn = document.getElementById('btnSendTestEmail');
-    let oldText = btn.innerText;
     btn.innerText = "Sending... Please wait";
     btn.disabled = true;
     
