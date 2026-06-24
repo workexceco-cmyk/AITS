@@ -1632,7 +1632,8 @@
       </div>
 
       <div class="global-search">
-        <input id="globalSearch" placeholder="Search category, product, brand, product ID, size, MRP, specification">
+        <input id="globalSearch" list="categorySuggestions" placeholder="Search category, product, brand, product ID, size, MRP, specification">
+        <datalist id="categorySuggestions"></datalist>
         <button onclick="runSearchNow()">Search</button>
       </div>
 
@@ -1644,7 +1645,10 @@
   <main class="wrap">
     
               <section id="trackerView" class="hidden">
-          <div id="trackerModeLabel"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <button class="back-btn" onclick="closeTrackerMode()">+? Back to Home</button>
+          <div id="trackerModeLabel" style="flex:1; margin-left:15px;"></div>
+        </div>
           
           <div class="tracker-dash-grid">
             <div class="t-card"><h3>Total Active Cases</h3><div class="t-val" id="tStatsCases">0</div></div>
@@ -1698,11 +1702,14 @@
 
           <div id="trackerResults" style="margin-top:20px;"></div>
 
-          <div class="panel mt-3">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-              <h3>Tracker Dashboard (Auto 24/7 Monitoring)</h3>
-              <button class="primary-btn" style="padding:6px 12px; font-size:13px;" onclick="loadTrackedProducts()">Refresh Board</button>
-            </div>
+          <div style="background:#fff; padding:20px; border-radius:8px; border:1px solid var(--line); margin-top:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--blue); padding-bottom:10px; margin-bottom:15px;">
+                <h2 style="margin:0; font-size:16px;">Tracker Dashboard (Auto 24/7 Monitoring)</h2>
+                <div>
+                  <button class="t-action-btn" style="color:var(--dark); text-decoration:none; margin-right:15px; font-weight:bold;" onclick="showTrackerHelp()">ℹ️ How it Works</button>
+                  <button class="primary-btn" style="padding:6px 12px; font-size:13px;" onclick="loadTrackedProducts()">Refresh Board</button>
+                </div>
+              </div>
             <div class="t-table-wrap">
               <table class="t-table">
                 <thead>
@@ -2062,6 +2069,8 @@
       categoryFiltered = [...categories];
       categoryPage = 1;
       currentView = "categories";
+      document.getElementById("categoryTitle").textContent = "Categories";
+      populateCategoryDatalist();
       renderCategoryPage();
     }
 
@@ -2109,6 +2118,13 @@
       if(us) us.value = "UPDATED_ASC";
       categoryPage = 1;
       renderCategoryPage();
+    }
+    function populateCategoryDatalist() {
+      const list = document.getElementById("categorySuggestions");
+      if(!list) return;
+      list.innerHTML = categories.map(function(c) {
+         return `<option value="${esc(getCategoryName(c))}"></option>`;
+      }).join('');
     }
 
     function sortCategoryList(list){
@@ -3937,6 +3953,30 @@
     loadTrackedProducts();
   }
 
+  function closeTrackerMode() {
+    document.querySelector('.hero').classList.remove('hidden');
+    document.getElementById('trackerView').classList.add('hidden');
+    backToCategories();
+  }
+
+  function showTrackerHelp() {
+    let html = `
+      <div style="padding:20px; font-family:sans-serif; line-height:1.6;">
+        <h2 style="margin-top:0; color:var(--blue);">How L1 Tracker Works</h2>
+        <p>This portal automatically monitors the GeM marketplace to ensure you remain the L1 seller for your products.</p>
+        <ol style="padding-left:20px; margin-bottom:20px;">
+          <li style="margin-bottom:10px;"><b>1. Find Product:</b> Enter the GeM Product ID. We analyze the product and <b>lock the exact specifications</b> (e.g., Color, Size, Material).</li>
+          <li style="margin-bottom:10px;"><b>2. Set Minimum Price:</b> Define the lowest price you are willing to sell at.</li>
+          <li style="margin-bottom:10px;"><b>3. 24/7 Monitoring:</b> Our AI continuously scans GeM. If any competitor uploads a product with the <i>exact same specifications</i> at a lower price, the Tracker detects it.</li>
+          <li style="margin-bottom:10px;"><b>4. Instant Alerts:</b> You instantly receive an email alert showing the competitor's price, allowing you to reduce your price just enough to win back the L1 position!</li>
+        </ol>
+        <p style="color:var(--muted); font-size:13px;"><i>Note: Emails are sent via your local backend script (Start_Local_Database.bat).</i></p>
+      </div>
+    `;
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('modal').classList.add('open');
+  }
+
   function clearTrackerForm() {
     document.getElementById('tInputPid').value = '';
     document.getElementById('tInputCustomer').value = '';
@@ -4130,6 +4170,10 @@
 
   async function loadTrackedProducts() {
     let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+    
+    // OPTIMISTIC RENDER: Instantly show local updates without waiting for backend
+    renderTrackerDashboard(cases, null);
+    
     let backendData = null;
 
     try {
@@ -4137,14 +4181,15 @@
       if(res.ok) {
         backendData = await res.json();
         document.getElementById('trackerModeLabel').innerHTML = ''; // Clear fallback label
+        
+        // Re-render with backend enhancements once data arrives
+        renderTrackerDashboard(cases, backendData);
       } else {
         throw new Error("Failed to load from backend");
       }
     } catch(e) {
       document.getElementById('trackerModeLabel').innerHTML = '<div style="background:#fff3cd; color:#856404; padding:10px; border-radius:4px; margin-bottom:15px; font-size:14px; border:1px solid #ffeeba;"><b>Local Test Mode:</b> Backend API not reachable. Cases stored in browser only.</div>';
     }
-
-    renderTrackerDashboard(cases, backendData);
   }
 
   function renderTrackerDashboard(cases, backendData) {
@@ -4371,33 +4416,42 @@
     }
   }
 
-  async function sendRealTestEmail(caseId) {
-    let btn = document.getElementById('btnSendTestEmail');
-    let oldText = btn.innerText;
-    
-    let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
-    let c = cases.find(x => x.caseId === caseId);
-    if(!c || !c.email) return alert("No email configured for this case!");
-    
-    btn.innerText = "Sending... Please wait";
-    btn.disabled = true;
-    
-    try {
-      let res = await fetch(GAS_API_URL + '/sendTestAlert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-        body: JSON.stringify({ email: c.email, productId: c.productId, title: c.refTitle, myPrice: c.refPrice, l1Price: c.l1Price })
-      });
-      let data = await res.json();
-      if(data.error) throw new Error(data.error);
-      alert("✅ " + data.message + "\n\nPlease check your inbox (and spam folder) for " + c.email);
-    } catch(e) {
-      alert("❌ Failed to send email: " + e.message + "\n\nPlease ensure Start_Local_Database.bat is running.");
-    } finally {
-      btn.innerText = oldText;
-      btn.disabled = false;
+    async function sendRealTestEmail(caseId) {
+      let btn = document.getElementById('btnSendTestEmail');
+      let oldText = btn.innerText;
+      
+      let cases = JSON.parse(localStorage.getItem('gem_tracker_cases') || '[]');
+      let c = cases.find(x => x.caseId === caseId);
+      if(!c || !c.email) return showToast("No email configured for this case!", "error");
+      
+      btn.innerText = "Sending... Please wait";
+      btn.disabled = true;
+      
+      try {
+        let res = await fetch(GAS_API_URL + '/sendTestAlert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+          body: JSON.stringify({ email: c.email, productId: c.productId, title: c.refTitle, myPrice: c.refPrice, l1Price: c.l1Price })
+        });
+        let data = await res.json();
+        if(data.error) throw new Error(data.error);
+        
+        let msg = `<div style="background:#d4edda; color:#155724; padding:15px; border-radius:6px; border:1px solid #c3e6cb; margin-top:15px;">
+          <b>✅ ${data.message}</b><br><br>Please check the inbox (and spam folder) for <b>${c.email}</b>.
+        </div>`;
+        btn.outerHTML = msg; // Replace button with success message
+      } catch(e) {
+        let msg = `<div style="background:#f8d7da; color:#721c24; padding:15px; border-radius:6px; border:1px solid #f5c6cb; margin-top:15px;">
+          <b>❌ Failed to Send Email</b><br><br>
+          <i>Error: ${e.message}</i><br><br>
+          <b>Note for Mobile Users:</b> The email backend runs locally on your computer. Your phone cannot connect to your computer's localhost unless you are on the same WiFi using a local IP, or using ngrok. Please try this action from the host laptop.
+        </div>`;
+        btn.outerHTML = msg; // Replace button with error message
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
     }
-  }
 
   async function removeTracked(caseId) {
     if(!confirm('Stop tracking this case?')) return;
