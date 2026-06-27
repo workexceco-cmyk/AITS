@@ -2164,8 +2164,7 @@
 
       if(categoryFiltered.length === 0 && term.length >= 2) {
         const grid = document.getElementById("categoryGrid");
-        grid.innerHTML = `<div class="panel loader" style="grid-column:1/-1;">Searching products globally for "${esc(term)}"...</div>`;
-        document.getElementById("categoryCount").textContent = "Global Search";
+        grid.innerHTML = `<div class="panel loader" style="grid-column:1/-1;">Searching...</div>`;
         fetchGlobalSearch(term);
         return;
       }
@@ -3591,10 +3590,11 @@
           }
         }
       } catch(e) {
-        console.error("Global search failed", e);
+        console.error("Search failed", e);
       }
       
-      document.getElementById("categoryGrid").innerHTML = `<div class="panel loader" style="grid-column:1/-1; color:red;">No categories or products found for "${esc(term)}".</div>`;
+      document.getElementById("categoryGrid").innerHTML = `<div class="panel loader" style="grid-column:1/-1; color:red;">No results found for "${esc(term)}".</div>`;
+      document.getElementById("categoryCount").textContent = "0 results";
     }
 
     function runSearchNow(){
