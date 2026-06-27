@@ -1631,15 +1631,18 @@
         </div>
       </div>
 
-      <div class="global-search">
-        <input id="globalSearch" list="categorySuggestions" placeholder="Search category, product, brand, product ID, size, MRP, specification">
-        <datalist id="categorySuggestions"></datalist>
-        <button onclick="runSearchNow()">Search</button>
-      </div>
+        <div class="global-search" style="display:flex; gap: 5px;">
+          <input id="globalSearch" list="categorySuggestions" placeholder="Search Category or Product ID" style="flex:2;">
+          <datalist id="categorySuggestions"></datalist>
+          
+          <input id="brandSearch" list="brandSuggestions" placeholder="Search Brand" style="flex:1;">
+          <datalist id="brandSuggestions"></datalist>
+
+          <button onclick="runSearchNow()">Search</button>
+        </div>
 
       <button class="t-action-btn" style="color:var(--dark); font-weight:bold; margin:0; text-decoration:none;" onclick="showTrackerHelp()">ℹ️ How Tracker Works</button>
       <button class="sync-btn" style="background:var(--green);" onclick="openTrackerMode()">L1 Tracker</button>
-      <button class="sync-btn" onclick="syncData()">Sync Data</button>
     </div>
   </header>
 
@@ -2037,8 +2040,26 @@
     window.onload = function(){
       bindSearch();
       fetchCategories();
+      fetchBrands();
       renderSliderPanel();
     };
+
+    async function fetchBrands() {
+      try {
+        let res = await fetch(GAS_API_URL + '/getAllBrands', { headers: { 'ngrok-skip-browser-warning': 'true' } });
+        if (res.ok) {
+          let allBrands = await res.json();
+          let dl = document.getElementById("brandSuggestions");
+          allBrands.forEach(b => {
+             let opt = document.createElement("option");
+             opt.value = b;
+             dl.appendChild(opt);
+          });
+        }
+      } catch(e) {
+        console.error("Failed to load brands", e);
+      }
+    }
 
     function hasGas(){
       return typeof google !== "undefined" && google.script && google.script.run;
@@ -3554,6 +3575,11 @@
           currentView === "categories" ? renderCategoryPage() : applyFilters();
         }, 250);
       });
+      document.getElementById('brandSearch').addEventListener('keyup', function(e) {
+        if(e.key === 'Enter') {
+          runSearchNow();
+        }
+      });
     }
 
     async function fetchGlobalSearch(term) {
@@ -3598,7 +3624,16 @@
     }
 
     function runSearchNow(){
-      currentView === "categories" ? renderCategoryPage() : applyFilters();
+      let brandTerm = document.getElementById('brandSearch').value.trim();
+      let term = document.getElementById('globalSearch').value.trim();
+      
+      if(brandTerm.length > 0) {
+          document.getElementById("categoryGrid").innerHTML = `<div class="panel loader" style="grid-column:1/-1;">Searching brand: ${esc(brandTerm)}...</div>`;
+          fetchGlobalSearch(brandTerm);
+      } else if (term.length >= 2) {
+          document.getElementById("categoryGrid").innerHTML = `<div class="panel loader" style="grid-column:1/-1;">Searching...</div>`;
+          fetchGlobalSearch(term);
+      }
     }
 
     function syncData(){
