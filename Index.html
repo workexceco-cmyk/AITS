@@ -75,7 +75,7 @@
       display:flex;
       background:#fff;
       border-radius:4px;
-      overflow:hidden;
+      overflow: visible;
     }
 
     .global-search input{
@@ -196,7 +196,7 @@
     /* GeM-style category marketplace cards */
     .gem-category-shell{
       width:100%;
-      overflow:hidden;
+      overflow: visible;
       border-radius:6px;
       background:#fff;
       border:1px solid #d6dee6;
@@ -207,7 +207,7 @@
       position:sticky;
       top:69px;
       z-index:40;
-      min-height:57px;
+      
       display:grid;
       grid-template-columns:auto 1fr auto;
       align-items:center;
@@ -593,7 +593,7 @@
       margin-bottom:14px;
       border:1px solid var(--line);
       border-radius:8px;
-      overflow:hidden;
+      overflow: visible;
       background:#fff;
     }
 
@@ -637,7 +637,7 @@
       background:#fff;
       border:1px solid #d6dee6;
       border-radius:8px;
-      overflow:hidden;
+      overflow: visible;
       transition:.18s ease;
       display:flex;
       flex-direction:column;
@@ -705,7 +705,7 @@
       color:#fff;
       width:max-content;
       max-width:100%;
-      overflow:hidden;
+      overflow: visible;
       text-overflow:ellipsis;
     }
 
@@ -734,9 +734,9 @@
       font-size:14px;
       font-weight:900;
       line-height:1.35;
-      min-height:57px;
-      max-height:57px;
-      overflow:hidden;
+      
+      
+      overflow: visible;
       color:#006eb6;
       cursor:pointer;
     }
@@ -1195,7 +1195,7 @@
       flex-direction: column;
       transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       height: 48px;
-      overflow: hidden;
+      overflow: visible;
     }
     .chat-widget.open {
       height: 480px;
@@ -1456,7 +1456,7 @@
     .title{
       min-height:auto !important;
       max-height:none !important;
-      -webkit-line-clamp:3;
+      
       font-size: 14px;
       font-weight: 700;
       color: #333;
@@ -1543,7 +1543,7 @@
     .vs-card.win { border-color: var(--l1-green); background: var(--best); }
     .vs-card h3 { margin-top:0; color: var(--muted); font-size:14px; text-transform:uppercase; letter-spacing:1px; }
     .vs-price { font-size: 32px; font-weight: 900; margin: 15px 0; color: var(--text); }
-    .vs-title { font-size: 14px; line-height:1.4; margin-bottom: 15px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .vs-title { font-size: 14px; line-height:1.4; margin-bottom: 15px; color: var(--muted); overflow: visible; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     .vs-badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background: var(--dark); color:#fff; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:bold; white-space:nowrap; }
     .tracker-row { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee; align-items:center; }
     .tracker-row:last-child { border:0; }
@@ -1580,6 +1580,72 @@
     .t-status.lost { background: #f8d7da; color: #721c24; }
     .t-action-btn { background: none; border: none; color: var(--blue); cursor: pointer; font-size: 13px; text-decoration: underline; margin-right: 10px; }
     .t-action-btn.danger { color: var(--danger); }
+
+
+      .category-card {
+        background: #fff;
+        border: 1px solid #e1e5ea;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 140px !important;
+        height: 100% !important;
+        position: relative;
+        overflow: visible;
+      }
+      .category-card:hover {
+        border-color: #0056b3;
+        box-shadow: 0 8px 24px rgba(0, 86, 179, 0.12);
+        transform: translateY(-3px);
+      }
+      .category-card::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #0056b3;
+        transform: scaleY(0); transition: transform 0.25s ease; transform-origin: center;
+      }
+      .category-card:hover::before { transform: scaleY(1); }
+      
+      .cat-card-content {
+        display: flex; align-items: flex-start; gap: 16px; flex: 1;
+      }
+      .cat-icon-wrap {
+        width: 48px; height: 48px; border-radius: 10px; background: #f0f7ff;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+      .cat-details {
+        flex: 1; min-width: 0;
+      }
+      .cat-name {
+        margin: 0 0 8px 0; font-size: 16px; font-weight: 800; color: #1a232c;
+        line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: visible;
+      }
+      .cat-meta {
+        display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap;
+      }
+      .cat-count {
+        color: #5a6672; font-weight: 600; background: #f4f6f8; padding: 4px 10px; border-radius: 20px;
+      }
+      .cat-status {
+        display: flex; align-items: center; gap: 6px; color: #0d8b4f; font-weight: 700; background: #e9f7ef; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7d8ba;
+      }
+      .cat-status .dot {
+        width: 8px; height: 8px; border-radius: 50%; background: #0d8b4f;
+      }
+      .cat-arrow {
+        display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+        border-radius: 50%; background: #f8fafc; color: #a0abb5; transition: all 0.2s ease; flex-shrink: 0;
+      }
+      .category-card:hover .cat-arrow {
+        background: #0056b3; color: #fff; border-color: #0056b3;
+      }
+      
+      .cat-footer {
+        margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e1e5ea;
+        font-size: 12px; color: #8795a1; font-weight: 600;
+      }
 
   </style>
 <body>
@@ -1861,8 +1927,8 @@
     }
     // ----------------------------------------
 
-    const CATEGORY_PAGE_SIZE = 50;
-    const GROUP_PAGE_SIZE = 8;
+    const CATEGORY_PAGE_SIZE = 12;
+    const GROUP_PAGE_SIZE = 12;
     const TOP_LIMIT = 3;
     const MAX_COMPARE = 10;
 
@@ -3260,7 +3326,73 @@
               <style>
                 .gem-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
                 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-              </style>
+            
+      .category-card {
+        background: #fff;
+        border: 1px solid #e1e5ea;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 140px !important;
+        height: 100% !important;
+        position: relative;
+        overflow: visible;
+      }
+      .category-card:hover {
+        border-color: #0056b3;
+        box-shadow: 0 8px 24px rgba(0, 86, 179, 0.12);
+        transform: translateY(-3px);
+      }
+      .category-card::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #0056b3;
+        transform: scaleY(0); transition: transform 0.25s ease; transform-origin: center;
+      }
+      .category-card:hover::before { transform: scaleY(1); }
+      
+      .cat-card-content {
+        display: flex; align-items: flex-start; gap: 16px; flex: 1;
+      }
+      .cat-icon-wrap {
+        width: 48px; height: 48px; border-radius: 10px; background: #f0f7ff;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+      .cat-details {
+        flex: 1; min-width: 0;
+      }
+      .cat-name {
+        margin: 0 0 8px 0; font-size: 16px; font-weight: 800; color: #1a232c;
+        line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: visible;
+      }
+      .cat-meta {
+        display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap;
+      }
+      .cat-count {
+        color: #5a6672; font-weight: 600; background: #f4f6f8; padding: 4px 10px; border-radius: 20px;
+      }
+      .cat-status {
+        display: flex; align-items: center; gap: 6px; color: #0d8b4f; font-weight: 700; background: #e9f7ef; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7d8ba;
+      }
+      .cat-status .dot {
+        width: 8px; height: 8px; border-radius: 50%; background: #0d8b4f;
+      }
+      .cat-arrow {
+        display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+        border-radius: 50%; background: #f8fafc; color: #a0abb5; transition: all 0.2s ease; flex-shrink: 0;
+      }
+      .category-card:hover .cat-arrow {
+        background: #0056b3; color: #fff; border-color: #0056b3;
+      }
+      
+      .cat-footer {
+        margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e1e5ea;
+        font-size: 12px; color: #8795a1; font-weight: 600;
+      }
+
+  </style>
               <div class="gem-spinner"></div>
               <h3 style="color:#555; margin-bottom:10px;">Loading Details...</h3>
               <p style="color:#888; font-size:14px;">Please wait a moment while we retrieve the latest seller information.</p>
@@ -3348,7 +3480,73 @@
         .gem-link-btn:hover { text-decoration: underline; }
         #viewAllSellersBox { display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
         .gem-mii-img { height: 20px; vertical-align: middle; margin-left: 10px; }
-        </style>
+      
+      .category-card {
+        background: #fff;
+        border: 1px solid #e1e5ea;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 140px !important;
+        height: 100% !important;
+        position: relative;
+        overflow: visible;
+      }
+      .category-card:hover {
+        border-color: #0056b3;
+        box-shadow: 0 8px 24px rgba(0, 86, 179, 0.12);
+        transform: translateY(-3px);
+      }
+      .category-card::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #0056b3;
+        transform: scaleY(0); transition: transform 0.25s ease; transform-origin: center;
+      }
+      .category-card:hover::before { transform: scaleY(1); }
+      
+      .cat-card-content {
+        display: flex; align-items: flex-start; gap: 16px; flex: 1;
+      }
+      .cat-icon-wrap {
+        width: 48px; height: 48px; border-radius: 10px; background: #f0f7ff;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+      .cat-details {
+        flex: 1; min-width: 0;
+      }
+      .cat-name {
+        margin: 0 0 8px 0; font-size: 16px; font-weight: 800; color: #1a232c;
+        line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: visible;
+      }
+      .cat-meta {
+        display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap;
+      }
+      .cat-count {
+        color: #5a6672; font-weight: 600; background: #f4f6f8; padding: 4px 10px; border-radius: 20px;
+      }
+      .cat-status {
+        display: flex; align-items: center; gap: 6px; color: #0d8b4f; font-weight: 700; background: #e9f7ef; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7d8ba;
+      }
+      .cat-status .dot {
+        width: 8px; height: 8px; border-radius: 50%; background: #0d8b4f;
+      }
+      .cat-arrow {
+        display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+        border-radius: 50%; background: #f8fafc; color: #a0abb5; transition: all 0.2s ease; flex-shrink: 0;
+      }
+      .category-card:hover .cat-arrow {
+        background: #0056b3; color: #fff; border-color: #0056b3;
+      }
+      
+      .cat-footer {
+        margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e1e5ea;
+        font-size: 12px; color: #8795a1; font-weight: 600;
+      }
+
+  </style>
 
         <div class="gem-modal-ui">
             <!-- Product Details Section -->
