@@ -2998,7 +2998,7 @@
               <span class="rating-pill">${p.seller_excellence && p.seller_excellence !== 'NA' ? esc(p.seller_excellence.split('|')[0].replace('Seller Excellence:','').trim()) : '4.0 - 4.49'} ★</span>
             </div>
 
-            <div class="meta-row">Brand: ${esc(p.brand)}</div>
+            <div class="meta-row">Brand: ${esc((p.brand||'').replace(/[®™\u00AE\u2122\u24C7]/g, '').trim())}</div>
             <div class="meta-row">Min. Qty. Per Consignee: ${p.min_qty || '1'}</div>
 
             <div class="price-zone">
@@ -3426,6 +3426,7 @@
                 </div></div>
                 <div class="gem-row"><div class="gem-lbl">Min. Qty. Per Consignee:</div><div class="gem-val">${esc(minQty)}</div></div>
                 <div class="gem-row"><div class="gem-lbl">Product id:</div><div class="gem-val">${esc(pid)}</div></div>
+                <div class="gem-row"><div class="gem-lbl">Brand:</div><div class="gem-val">${esc((p.brand||'').replace(/[®™\u00AE\u2122\u24C7]/g, '').trim())}</div></div>
                 <div class="gem-row"><div class="gem-lbl">Country Of Origin:</div><div class="gem-val">${esc(coo)}</div></div>
                 <div class="gem-row"><div class="gem-lbl">Local Content (MII):</div><div class="gem-val">${esc(mii)} <img src="https://assets-mkpbg.gem.gov.in/img/mii_logo.png" class="gem-mii-img" onerror="this.style.display='none'"></div></div>
                 
