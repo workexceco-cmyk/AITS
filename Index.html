@@ -280,100 +280,25 @@
       width:100%;
     }
 
-    .category-card{
-      height:162px;
-      min-height:162px;
-      background:#fff;
-      border:1px solid #d6dee6;
-      border-radius:8px;
-      padding:19px 18px 16px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
-      overflow:hidden;
-    }
+    
 
-    .category-card:hover{
-      transform:translateY(-2px);
-      border-color:#b8cfdf;
-      box-shadow:0 7px 18px rgba(5,54,74,.10);
-    }
+    
 
-    .category-card-top{min-height:48px;}
+    
 
-    .category-card-name{
-      color:#0073b7;
-      font-size:16px;
-      line-height:1.28;
-      font-weight:900;
-      min-height:20px;
-      max-height:41px;
-      overflow:hidden;
-      display:-webkit-box;
-      -webkit-line-clamp:2;
-      -webkit-box-orient:vertical;
-      cursor:pointer;
-    }
+    
 
-    .category-card-count{
-      margin-top:6px;
-      color:#4f5d6a;
-      font-size:14px;
-      line-height:20px;
-      min-height:20px;
-      white-space:nowrap;
-    }
+    
 
-    .category-card-mid{
-      display:grid;
-      grid-template-columns:auto auto;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      margin-top:12px;
-    }
+    
 
-    .gem-ready-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:67px;
-      height:26px;
-      padding:0 14px;
-      border-radius:18px;
-      background:#e9f7ef;
-      border:1px solid #a7d8ba;
-      color:#16833a;
-      font-size:12px;
-      font-weight:900;
-    }
+    
 
-    .gem-view-btn{
-      height:34px;
-      min-width:120px;
-      border:1px solid #d2d9df;
-      border-radius:4px;
-      background:#fff;
-      color:#111827;
-      font-size:13px;
-      font-weight:900;
-      cursor:pointer;
-    }
+    
 
-    .gem-view-btn:hover{
-      background:#f7fafc;
-      border-color:#b9c4cc;
-    }
+    
 
-    .category-card-updated{
-      margin-top:14px;
-      color:#5b6671;
-      font-size:12px;
-      line-height:16px;
-      font-weight:800;
-      white-space:nowrap;
-    }
+    
 
     .category-skeleton{
       min-height:163px;
@@ -402,8 +327,8 @@
 
     @media(max-width:560px){
       .category-grid{grid-template-columns:1fr;}
-      .category-card-mid{grid-template-columns:1fr; justify-content:stretch;}
-      .gem-view-btn{width:100%;}
+      
+      
     }
 
     .category-table{
@@ -1495,35 +1420,17 @@
       align-items:stretch;
     }
 
-    .category-card{
-      height:auto !important;
-      min-height:176px !important;
-      padding:16px 18px 14px !important;
-      overflow:visible !important;
-    }
+    
 
-    .category-card-top{
-      min-height:58px !important;
-    }
+    
 
-    .category-card-name{
-      max-height:none !important;
-      min-height:40px !important;
-      -webkit-line-clamp:2;
-    }
+    
 
-    .category-card-count{
-      margin-top:5px !important;
-    }
+    
 
-    .category-card-mid{
-      margin-top:10px !important;
-    }
+    
 
-    .category-card-updated{
-      margin-top:12px !important;
-      white-space:normal !important;
-    }
+    
 
     .gem-pagination{
       margin-top:8px !important;
@@ -1623,7 +1530,7 @@
         padding:10px 14px !important;
       }
       .gem-card-area{padding:10px 14px 16px !important;}
-      .category-card{min-height:172px !important;}
+      
       .card{min-height:auto !important;}
       .card-body{min-height:auto;}
     }
@@ -2260,16 +2167,25 @@
         const count = getCategoryProductCount(cat);
         const countText = count ? count.toLocaleString('en-IN') + " products" : "Loading products...";
         return `
-          <article class="category-card">
-            <div class="category-card-top">
-              <div class="category-card-name" title="${esc(name)}" onclick="openCategory('${jsAttr(name)}','${jsAttr(cat.fileName || '')}')">${esc(name)}</div>
-              <div class="category-card-count" data-category-count="${esc(name)}">${esc(countText)}</div>
+          <article class="category-card" onclick="openCategory('${jsAttr(name)}','${jsAttr(cat.fileName || '')}')">
+            <div class="cat-card-content">
+              <div class="cat-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0056b3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <div class="cat-details">
+                <h3 class="cat-name" title="${esc(name)}">${esc(name)}</h3>
+                <div class="cat-meta">
+                  <span class="cat-count" data-category-count="${esc(name)}">${esc(countText)}</span>
+                  <span class="cat-status"><span class="dot"></span>Ready</span>
+                </div>
+              </div>
+              <div class="cat-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
             </div>
-            <div class="category-card-mid">
-              <span class="gem-ready-pill">Ready</span>
-              <button class="gem-view-btn" onclick="openCategory('${jsAttr(name)}','${jsAttr(cat.fileName || '')}')">View Products</button>
+            <div class="cat-footer">
+              Updated ${esc(getCategoryUpdated(cat))}
             </div>
-            <div class="category-card-updated">Updated ${esc(getCategoryUpdated(cat))}</div>
           </article>
         `;
       }).join("") : `<div class="panel loader" style="grid-column:1/-1;">No category found.</div>`;
