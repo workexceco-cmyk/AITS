@@ -2998,7 +2998,7 @@
               <span class="rating-pill">${p.seller_excellence && p.seller_excellence !== 'NA' ? esc(p.seller_excellence.split('|')[0].replace('Seller Excellence:','').trim()) : '4.0 - 4.49'} ★</span>
             </div>
 
-            <div class="meta-row">Brand: ${esc((p.brand||'').replace(/[®™\u00AE\u2122\u24C7]/g, '').trim())}</div>
+            <div class="meta-row">Brand: ${esc(cleanBrandName(p.brand))}</div>
             <div class="meta-row">Min. Qty. Per Consignee: ${p.min_qty || '1'}</div>
             <div class="meta-row">Seller Offerings: ${((p.all_specifications_and_details||{}).All_Sellers_Summary||{})['Number of Seller Offerings'] || 'Click Details to view'}</div>
 
@@ -3432,7 +3432,7 @@
                 </div></div>
                 <div class="gem-row"><div class="gem-lbl">Min. Qty. Per Consignee:</div><div class="gem-val">${esc(minQty)}</div></div>
                 <div class="gem-row"><div class="gem-lbl">Product id:</div><div class="gem-val">${esc(pid)}</div></div>
-                <div class="gem-row"><div class="gem-lbl">Brand:</div><div class="gem-val">${esc((p.brand||'').replace(/[®™\u00AE\u2122\u24C7]/g, '').trim())}</div></div>
+                <div class="gem-row"><div class="gem-lbl">Brand:</div><div class="gem-val">${esc(cleanBrandName(p.brand))}</div></div>
                 <div class="gem-row"><div class="gem-lbl">Country Of Origin:</div><div class="gem-val">${esc(coo)}</div></div>
                 <div class="gem-row"><div class="gem-lbl">Local Content (MII):</div><div class="gem-val">${esc(mii)} <img src="https://assets-mkpbg.gem.gov.in/img/mii_logo.png" class="gem-mii-img" onerror="this.style.display='none'"></div></div>
                 
@@ -4032,6 +4032,36 @@
       return text.length > len ? text.slice(0, len - 3) + "..." : text;
     }
 
+    function cleanBrandName(brand) {
+        if (!brand || brand === 'NA') return '';
+        let b = String(brand).replace(/[®™\u00AE\u2122\u24C7]/g, '').trim();
+        
+        // Handle common GeM extraction errors where superscript R, TM, or UR are appended
+        if (b.endsWith('TM')) {
+            b = b.slice(0, -2).trim();
+        }
+        if (b.endsWith('UR') && !['FOUR', 'HOUR', 'YOUR', 'POUR', 'TOUR', 'SOUR', 'FLOUR', 'ARMOUR'].includes(b.toUpperCase())) {
+            b = b.slice(0, -2).trim();
+        }
+        if (b.endsWith('R')) {
+            const validREndings = ['ACER', 'BAYER', 'PFIZER', 'KARCHER', 'HAIR', 'MOTOR', 'POWER', 'SUPER', 'WATER', 'SOLAR', 'STAR', 'CLEAR', 'MASTER', 'PAPER', 'LASER', 'INTERIOR', 'COMPUTER', 'FILTER', 'PRINTER', 'SCANNER', 'SERVER', 'ROUTER', 'BATTER', 'CHARGER', 'COPPER', 'SILVER', 'TOWER', 'LAYER', 'BUILDER', 'BUYER', 'SELLER', 'PROVIDER'];
+            
+            let isValidR = false;
+            const upperB = b.toUpperCase();
+            for (let word of validREndings) {
+                if (upperB === word || upperB.endsWith(' ' + word)) {
+                    isValidR = true;
+                    break;
+                }
+            }
+            
+            if (!isValidR && upperB.length > 3) {
+                b = b.slice(0, -1).trim();
+            }
+        }
+        return b;
+    }
+
     function esc(v){
       return String((v !== null && v !== undefined) ? v : "")
         .replace(/&/g,"&amp;")
@@ -4275,7 +4305,7 @@
         <h3 style="margin-top:0; color:var(--blue);">Reference Product Found</h3>
         <div style="background:#f5f5f5; padding:15px; border-radius:4px; margin-bottom:15px; font-size:14px;">
           <b>Title:</b> ${esc(p.title)}<br>
-          <b>Brand:</b> ${esc(p.brand)} | <b>Category:</b> ${esc(p.category && p.category.name ? p.category.name : p.category)}<br>
+          <b>Brand:</b> ${esc(cleanBrandName(p.brand))} | <b>Category:</b> ${esc(p.category && p.category.name ? p.category.name : p.category)}<br>
           <b>Current Price:</b> ₹${getPriceNum(p).toLocaleString()} | <b>Seller:</b> ${esc(p.seller)}
         </div>
         <h4>Select Specifications to Lock for Matching:</h4>
