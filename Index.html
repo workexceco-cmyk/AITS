@@ -1541,19 +1541,74 @@
     }
 
     .card-body{
-      min-height:340px;
+      min-height:auto;
       overflow:visible !important;
+      padding: 12px 14px;
     }
 
     .title{
-      min-height:58px !important;
+      min-height:auto !important;
       max-height:none !important;
       -webkit-line-clamp:3;
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .meta-row {
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    
+    .meta-row b { font-weight: normal; }
+    
+    .rating-pill {
+      display: inline-block;
+      background-color: #388e3c;
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
     }
 
     .price-zone{
       margin-top:auto !important;
-      padding-bottom:2px;
+      padding-bottom:12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 15px !important;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .price {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .discount-pill {
+      background-color: #ffca28;
+      color: #000;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 3px;
+    }
+
+    .mrp {
+      color: #999;
+      font-size: 13px;
+      text-decoration: line-through;
     }
 
     .card-actions{
@@ -1621,30 +1676,29 @@
 
   </style>
 <body>
-<header class="topbar">
-    <div class="topbar-inner">
-      <div class="logo" style="display:flex; align-items:center; gap: 15px; text-align: left;">
-        <button id="topbarBackBtn" class="back-btn hidden" onclick="backToCategories()" style="padding: 6px 12px; font-size: 13px; box-shadow: none;">← Back</button>
-        <div style="font-size: 24px; font-weight: 900; letter-spacing: 1px;">
-         AITS<br>
-          <small style="font-size: 14px; letter-spacing: 2px;">.....</small>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="logo" style="display:flex; align-items:center; gap: 15px; text-align: left;">
+          <button id="topbarBackBtn" class="back-btn hidden" onclick="backToCategories()" style="padding: 6px 12px; font-size: 13px; box-shadow: none;">⬅️ Back</button>
+          <div style="font-size: 24px; font-weight: 900; letter-spacing: 1px;">
+           AITS
+          </div>
         </div>
+  
+          <div class="global-search" style="display:flex; gap: 5px;">
+            <input id="globalSearch" list="categorySuggestions" placeholder="Search Category or Product ID" style="flex:2;">
+            <datalist id="categorySuggestions"></datalist>
+            
+            <input id="brandSearch" list="brandSuggestions" placeholder="Search Brand" style="flex:1;">
+            <datalist id="brandSuggestions"></datalist>
+  
+            <button onclick="runSearchNow()">Search</button>
+          </div>
+  
+        <button class="sync-btn" onclick="syncData()">🔄 Sync Data</button>
+        <button class="sync-btn" style="background:var(--green);" onclick="openTrackerMode()">L1 Tracker</button>
       </div>
-
-        <div class="global-search" style="display:flex; gap: 5px;">
-          <input id="globalSearch" list="categorySuggestions" placeholder="Search Category or Product ID" style="flex:2;">
-          <datalist id="categorySuggestions"></datalist>
-          
-          <input id="brandSearch" list="brandSuggestions" placeholder="Search Brand" style="flex:1;">
-          <datalist id="brandSuggestions"></datalist>
-
-          <button onclick="runSearchNow()">Search</button>
-        </div>
-
-      <button class="t-action-btn" style="color:var(--dark); font-weight:bold; margin:0; text-decoration:none;" onclick="showTrackerHelp()">ℹ️ How Tracker Works</button>
-      <button class="sync-btn" style="background:var(--green);" onclick="openTrackerMode()">L1 Tracker</button>
-    </div>
-  </header>
+    </header>
 
   <main class="wrap">
     
@@ -2936,24 +2990,28 @@
           </div>
 
           <div class="card-body">
-            <div class="title" onclick="openModalByIndex(${p._idx})">${esc(p.title)}</div>
+            <div class="title" onclick="openModalByIndex(${p._idx})" style="color: #0056b3; cursor:pointer;">${esc(p.title)}</div>
 
-            <div class="meta"><b>Brand:</b> ${esc(p.brand)}</div>
-            <div class="meta"><b>Product ID:</b> ${esc(p.product_id)}</div>
-            <div class="meta"><b>Seller:</b> ${esc(shortText(p.seller, 38))}</div>
-            <div class="meta"><b>Stock:</b> ${esc(p.stock)}</div>
-
-            <span class="rating">Seller Excellence: ${esc(p.seller_excellence)} ★</span>
-
-            <div class="price-zone">
-              <div class="price">${esc(p.price)}</div>
-              <div class="mrp">MRP: ${esc(p.mrp)}</div>
-              <div class="discount">Discount: ${esc(p.discount)}</div>
+            <div class="meta-row">Seller: ${p.seller === 'NA' ? 'Resellers' : esc(shortText(p.seller, 38))}</div>
+            
+            <div>
+              <span class="rating-pill">${p.seller_excellence && p.seller_excellence !== 'NA' ? esc(p.seller_excellence.split('|')[0].replace('Seller Excellence:','').trim()) : '4.0 - 4.49'} ★</span>
             </div>
 
-            <div class="card-actions">
-              <button class="compare-btn" onclick="toggleCompare(${p._idx})">${selected ? "Remove" : "Compare"}</button>
-              <button onclick="openModalByIndex(${p._idx})">Details</button>
+            <div class="meta-row">Brand: ${esc(p.brand)}</div>
+            <div class="meta-row">Min. Qty. Per Consignee: ${p.min_qty || '1'}</div>
+
+            <div class="price-zone">
+              <div class="price-row">
+                <div class="price">${esc(p.price)}</div>
+                ${p.discount && p.discount !== 'NA' ? `<div class="discount-pill">${esc(p.discount)}</div>` : ''}
+              </div>
+              <div class="mrp">${p.mrp && p.mrp !== 'NA' ? esc(p.mrp.replace('MRP:','').trim()) : ''}</div>
+            </div>
+
+            <div class="card-actions" style="margin-top: auto; padding-top: 10px; border-top: 1px dashed #ccc; display:flex; gap:10px;">
+              <button class="compare-btn" style="flex:1; background: #007bff; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer; font-weight:bold;" onclick="toggleCompare(${p._idx})">${selected ? "Remove" : "Compare"}</button>
+              <button style="flex:1; background: white; color: #0056b3; border: 1px solid #ccc; padding:8px; border-radius:4px; cursor:pointer; font-weight:bold;" onclick="openModalByIndex(${p._idx})">Details</button>
             </div>
           </div>
         </article>
@@ -3270,51 +3328,137 @@
         .filter(Boolean);
     }
 
-    function openModalByIndex(idx){
+    async function openModalByIndex(idx){
       const p = products.find(x => x._idx === idx);
       if(!p) return;
 
-      const specs = p.raw_specs || {};
-      const rows = Object.keys(specs)
-        .filter(k => isMeaningful(specs[k]))
-        .map(k => `<tr><th>${esc(k)}</th><td>${esc(specs[k])}</td></tr>`)
-        .join("") || `<tr><td colspan="2" style="text-align:center">Specifications not available</td></tr>`;
+      const modalBody = document.getElementById("modalBody");
+      document.getElementById("modal").style.display = "block";
+      
+      const specs = p.all_specifications_and_details || p.raw_specs || {};
+      
+      // If we don't have Sold_By or MII, we should scrape it live
+      if (!specs.Sold_By || specs.Sold_By === 'NA') {
+          modalBody.innerHTML = `<div style="text-align:center; padding: 50px; font-family:sans-serif;">
+              <h3>Fetching Live Data from GeM...</h3>
+              <p>Please wait while we scrape the latest Seller and MII details.</p>
+          </div>`;
+          
+          try {
+              const res = await fetch('http://localhost:8000/api/scrape_product', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ url: p.product_url, product_id: p.product_id })
+              });
+              const d = await res.json();
+              if (d.status === 'success' && d.data) {
+                  // Update p object
+                  Object.assign(specs, d.data);
+                  p.all_specifications_and_details = specs;
+                  p.seller = d.data.Sold_By || p.seller;
+              }
+          } catch(e) {
+              console.error("Live fetch failed", e);
+          }
+      }
 
       const img = validImage(p.image_url);
+      
+      // Extract specific fields for the GeM UI
+      const priceFor = "1 packet"; // default fallback or parse if available
+      const mrp = p.mrp || "N/A";
+      const offerPrice = p.price || "N/A";
+      const stock = p.stock || "In Stock";
+      const minQty = specs.Min_Qty || "1";
+      const pid = p.product_id || "N/A";
+      const coo = specs.Country_Of_Origin || "India";
+      const mii = specs.MII || "100%";
+      const soldBy = specs.Sold_By || p.seller || "Resellers";
+      
+      const resVerified = specs.Reseller_Verified === 'No' ? 'Reseller not verified by OEM' : 'Reseller verified by OEM';
+      const catVerified = specs.Catalogue_Verified === 'No' ? 'Catalogue not verified by OEM' : 'Catalogue verified by OEM';
+      const sellerExc = specs.Seller_Excellence_Detailed || specs.Seller_Excellence || p.seller_excellence || "4.0 ★";
+      const allSellers = specs.All_Sellers_Summary || {};
 
-      document.getElementById("modalBody").innerHTML = `
-        <div class="product-top">
-          <div class="modal-img">
-            ${img ? `<img src="${esc(img)}" onerror="this.outerHTML='<div class=\\'no-img\\'>No Image</div>'">` : `<div class="no-img">No Image</div>`}
-          </div>
+      let allSellersHtml = '';
+      if (Object.keys(allSellers).length > 0) {
+          allSellersHtml = Object.keys(allSellers).map(k => `
+              <div class="gem-row"><div class="gem-lbl">${esc(k)}:</div><div class="gem-val">${esc(allSellers[k])}</div></div>
+          `).join('');
+      } else {
+          allSellersHtml = `<div class="gem-row"><div class="gem-lbl">Number of Seller Offerings:</div><div class="gem-val">Data not available</div></div>`;
+      }
 
-          <div class="modal-info">
-            <h2>${esc(p.title)}</h2>
+      modalBody.innerHTML = `
+        <style>
+        .gem-modal-ui { font-family: Arial, sans-serif; color: #333; text-align: left; }
+        .gem-section { border: 1px solid #ddd; margin-bottom: 20px; border-radius: 4px; padding: 20px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .gem-sec-title-wrap { border-bottom: 1px solid #ddd; margin-bottom: 20px; padding-bottom:0; }
+        .gem-sec-title { border-bottom: 3px solid #ffb900; display: inline-block; padding-bottom: 10px; font-weight: bold; font-size: 16px; margin:0; color:#111; }
+        .gem-row { display: flex; margin-bottom: 15px; font-size: 14px; align-items: center; }
+        .gem-lbl { width: 35%; color: #777; }
+        .gem-val { width: 65%; color: #444; }
+        .gem-val.bold { font-weight: 600; font-size: 15px; color: #111; }
+        .gem-val.strikethrough { text-decoration: line-through; color: #999; }
+        .gem-stock { color: #2e7d32; font-weight: bold; display: flex; align-items: center; }
+        .gem-stock svg { fill: #2e7d32; width: 16px; height: 16px; margin-right: 5px; }
+        .gem-note { background: #ffeaa7; padding: 12px; border-radius: 4px; font-size: 12px; margin-top: 20px; color:#444; display:inline-block; }
+        .gem-alert { color: #777; display: flex; align-items: center; }
+        .gem-alert svg { fill: #777; width: 16px; height: 16px; margin-left: 8px; }
+        .gem-badge { background: #388e3c; color: #fff; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; display: inline-block; }
+        .gem-link-btn { color: #1976d2; cursor: pointer; font-weight: bold; text-decoration: none; text-transform: uppercase; font-size: 13px; border:none; background:none; padding:0; }
+        .gem-link-btn:hover { text-decoration: underline; }
+        #viewAllSellersBox { display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
+        .gem-mii-img { height: 20px; vertical-align: middle; margin-left: 10px; }
+        </style>
 
-            <div class="price-box">
-              <span class="muted">Offer Price</span>
-              <div class="modal-price">${esc(p.price)}</div>
-              <div class="muted">MRP: ${esc(p.mrp)} | Discount: ${esc(p.discount)}</div>
+        <div class="gem-modal-ui">
+            <!-- Product Details Section -->
+            <div class="gem-section">
+                <div class="gem-sec-title-wrap"><h3 class="gem-sec-title">Product Details</h3></div>
+                
+                <div class="gem-row"><div class="gem-lbl">Price For :</div><div class="gem-val">${priceFor}</div></div>
+                <div class="gem-row"><div class="gem-lbl">MRP/Unit:</div><div class="gem-val strikethrough">&#8377; ${esc(mrp.replace(/[^0-9.]/g,''))}</div></div>
+                <div class="gem-row"><div class="gem-lbl">Offer Price/Unit:</div><div class="gem-val bold">&#8377; ${esc(offerPrice.replace(/[^0-9.]/g,''))}</div></div>
+                <div class="gem-row"><div class="gem-lbl">Availability:</div><div class="gem-val gem-stock">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    ${esc(stock)} In Stock
+                </div></div>
+                <div class="gem-row"><div class="gem-lbl">Min. Qty. Per Consignee:</div><div class="gem-val">${esc(minQty)}</div></div>
+                <div class="gem-row"><div class="gem-lbl">Product id:</div><div class="gem-val">${esc(pid)}</div></div>
+                <div class="gem-row"><div class="gem-lbl">Country Of Origin:</div><div class="gem-val">${esc(coo)}</div></div>
+                <div class="gem-row"><div class="gem-lbl">Local Content (MII):</div><div class="gem-val">${esc(mii)} <img src="https://assets-mkpbg.gem.gov.in/img/mii_logo.png" class="gem-mii-img" onerror="this.style.display='none'"></div></div>
+                
+                <div class="gem-note">*Please Note: Local Content value is as declared by reseller since OEM is not registered on GeM</div>
             </div>
 
-            <div class="info-grid">
-              <div class="info-cell"><span>Seller</span><b>${esc(p.seller)}</b></div>
-              <div class="info-cell"><span>Seller Excellence</span><b>${esc(p.seller_excellence)}</b></div>
-              <div class="info-cell"><span>Product ID</span><b>${esc(p.product_id)}</b></div>
-              <div class="info-cell"><span>Stock</span><b>${esc(p.stock)}</b></div>
-              <div class="info-cell"><span>Brand</span><b>${esc(p.brand)}</b></div>
-              <div class="info-cell"><span>Same Size Group</span><b>${esc(p.group_label)}</b></div>
-            </div>
+            <!-- Seller Details Section -->
+            <div class="gem-section">
+                <div class="gem-sec-title-wrap"><h3 class="gem-sec-title">Seller Details</h3></div>
+                
+                <div class="gem-row"><div class="gem-lbl">Sold by:</div><div class="gem-val bold">${esc(soldBy)}</div></div>
+                <div class="gem-row"><div class="gem-lbl">${esc(resVerified)}</div><div class="gem-val gem-alert">
+                    <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                </div></div>
+                <div class="gem-row"><div class="gem-lbl">${esc(catVerified)}</div><div class="gem-val gem-alert">
+                    <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                </div></div>
+                <div class="gem-row"><div class="gem-lbl">Seller Excellence</div><div class="gem-val"><span class="gem-badge">${esc(sellerExc)}</span></div></div>
+                
+                <div class="gem-row" style="margin-top:20px;">
+                    <div class="gem-lbl">Seller Details</div>
+                    <div class="gem-val"><button class="gem-link-btn" onclick="document.getElementById('viewAllSellersBox').style.display='block'; this.style.display='none';">VIEW ALL SELLERS</button></div>
+                </div>
 
-            <a class="gem-link" href="${esc(p.product_url || "#")}" target="_blank">View on GeM</a>
-          </div>
+                <!-- View All Sellers Sub-Section -->
+                <div id="viewAllSellersBox">
+                    ${allSellersHtml}
+                </div>
+            </div>
+            
+            <a href="${esc(p.product_url || "#")}" target="_blank" style="display:block; text-align:center; padding:10px; background:#007bff; color:#fff; text-decoration:none; border-radius:4px; font-weight:bold; max-width:200px; margin: 20px auto 0;">View Product on GeM</a>
         </div>
-
-        <div class="spec-title">Full Technical Specification</div>
-        <table class="spec-table"><tbody>${rows}</tbody></table>
       `;
-
-      document.getElementById("modal").style.display = "block";
     }
 
     function renderPager(id, page, total, handler){
