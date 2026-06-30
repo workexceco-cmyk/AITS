@@ -3380,19 +3380,35 @@
       const coo = specs.Country_Of_Origin || "India";
       const mii = specs.MII || "100%";
       const soldBy = specs.Sold_By || p.seller || "Resellers";
-      
-      const resVerified = specs.Reseller_Verified === 'No' ? 'Reseller not verified by OEM' : 'Reseller verified by OEM';
-      const catVerified = specs.Catalogue_Verified === 'No' ? 'Catalogue not verified by OEM' : 'Catalogue verified by OEM';
-      const sellerExc = specs.Seller_Excellence_Detailed || specs.Seller_Excellence || p.seller_excellence || "4.0 ★";
-      const allSellers = specs.All_Sellers_Summary || {};
+      const isOem = String(soldBy).toUpperCase() === 'OEM';
+        
+      let resVerifiedHtml = '';
+      if (!isOem) {
+          const resVerifiedText = specs.Reseller_Verified === 'No' ? 'Reseller not verified by OEM' : 'Reseller verified by OEM';
+          const resIcon = specs.Reseller_Verified === 'No' ? 
+              `<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>` : 
+              `<svg viewBox="0 0 24 24" style="fill:#388e3c;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+          resVerifiedHtml = `<div class="gem-row"><div class="gem-lbl">${esc(resVerifiedText)}</div><div class="gem-val gem-alert" style="color: ${specs.Reseller_Verified === 'No' ? '#777' : '#388e3c'};">${resIcon}</div></div>`;
+      }
 
+      const catVerifiedText = isOem ? 'OEM verified catalogue' : (specs.Catalogue_Verified === 'No' ? 'Catalogue not verified by OEM' : 'Catalogue verified by OEM');
+      const catIcon = specs.Catalogue_Verified === 'No' ? 
+          `<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>` : 
+          `<svg viewBox="0 0 24 24" style="fill:#388e3c;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+      const catVerifiedHtml = `<div class="gem-row"><div class="gem-lbl">${esc(catVerifiedText)}</div><div class="gem-val gem-alert" style="color: ${specs.Catalogue_Verified === 'No' ? '#777' : '#388e3c'};">${catIcon}</div></div>`;
+
+      let sellerExc = specs.Seller_Excellence_Detailed || specs.Seller_Excellence || p.seller_excellence || "NA";
+      if (isOem && sellerExc === "NA") sellerExc = "VA";
+
+      const allSellers = specs.All_Sellers_Summary || {};
       let allSellersHtml = '';
       if (Object.keys(allSellers).length > 0) {
-          allSellersHtml = Object.keys(allSellers).map(k => `
-              <div class="gem-row"><div class="gem-lbl">${esc(k)}:</div><div class="gem-val">${esc(allSellers[k])}</div></div>
-          `).join('');
-      } else {
-          allSellersHtml = `<div class="gem-row"><div class="gem-lbl">Number of Seller Offerings:</div><div class="gem-val">Data not available</div></div>`;
+          allSellersHtml = `<div style="margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;">` + 
+              Object.keys(allSellers).map(k => `
+                  <div class="gem-row"><div class="gem-lbl">${esc(k)}:</div><div class="gem-val">${esc(allSellers[k])}</div></div>
+              `).join('') + `</div>`;
+      } else if (!isOem) {
+          allSellersHtml = `<div style="margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;"><div class="gem-row"><div class="gem-lbl">Number of Seller Offerings:</div><div class="gem-val">Data not available</div></div></div>`;
       }
 
       modalBody.innerHTML = `
@@ -3443,18 +3459,13 @@
             <div class="gem-section">
                 <div class="gem-sec-title-wrap"><h3 class="gem-sec-title">Seller Details</h3></div>
                 
-                <div style="margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
-                    ${allSellersHtml}
-                </div>
+                ${allSellersHtml}
 
                 <div class="gem-row"><div class="gem-lbl">Sold by:</div><div class="gem-val bold">${esc(soldBy)}</div></div>
-                <div class="gem-row"><div class="gem-lbl">${esc(resVerified)}</div><div class="gem-val gem-alert">
-                    <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-                </div></div>
-                <div class="gem-row"><div class="gem-lbl">${esc(catVerified)}</div><div class="gem-val gem-alert">
-                    <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-                </div></div>
-                <div class="gem-row"><div class="gem-lbl">Seller Excellence</div><div class="gem-val"><span class="gem-badge">${esc(sellerExc)}</span></div></div>
+                ${resVerifiedHtml}
+                ${catVerifiedHtml}
+                <div class="gem-row"><div class="gem-lbl">Seller Excellence</div><div class="gem-val"><span class="gem-badge">${esc(sellerExc)} ${sellerExc === 'VA' ? '<svg viewBox="0 0 24 24" style="fill:#fff; width:12px; height:12px; margin-left:3px; vertical-align:middle;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' : ''}</span></div></div>
+                ${isOem ? `<div class="gem-row" style="margin-top:15px;"><div class="gem-lbl">Seller Details</div><div class="gem-val"><a href="#" style="color:#1976d2; font-weight:bold; text-decoration:none;">VIEW SELLER DETAILS</a></div></div>` : ''}
             </div>
             
             <a href="${esc(p.product_url || "#")}" target="_blank" style="display:block; text-align:center; padding:10px; background:#007bff; color:#fff; text-decoration:none; border-radius:4px; font-weight:bold; max-width:200px; margin: 20px auto 0;">View Product on GeM</a>
