@@ -3341,8 +3341,13 @@
       // If we don't have Sold_By or MII, we should scrape it live
       if (!specs.Sold_By || specs.Sold_By === 'NA' || !specs.All_Sellers_Summary || Object.keys(specs.All_Sellers_Summary).length === 0) {
           modalBody.innerHTML = `<div style="text-align:center; padding: 50px; font-family:sans-serif;">
-              <h3>Fetching Live Data from GeM...</h3>
-              <p>Please wait while we scrape the latest Seller and MII details.</p>
+              <style>
+                .gem-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+              </style>
+              <div class="gem-spinner"></div>
+              <h3 style="color:#555; margin-bottom:10px;">Loading Details...</h3>
+              <p style="color:#888; font-size:14px;">Please wait a moment while we retrieve the latest seller information.</p>
           </div>`;
           
           try {
