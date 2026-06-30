@@ -3000,6 +3000,7 @@
 
             <div class="meta-row">Brand: ${esc((p.brand||'').replace(/[®™\u00AE\u2122\u24C7]/g, '').trim())}</div>
             <div class="meta-row">Min. Qty. Per Consignee: ${p.min_qty || '1'}</div>
+            <div class="meta-row">Seller Offerings: ${((p.all_specifications_and_details||{}).All_Sellers_Summary||{})['Number of Seller Offerings'] || 'Click Details to view'}</div>
 
             <div class="price-zone">
               <div class="price-row">
