@@ -3338,7 +3338,7 @@
       const specs = p.all_specifications_and_details || p.raw_specs || {};
       
       // If we don't have Sold_By or MII, we should scrape it live
-      if (!specs.Sold_By || specs.Sold_By === 'NA') {
+      if (!specs.Sold_By || specs.Sold_By === 'NA' || !specs.All_Sellers_Summary || Object.keys(specs.All_Sellers_Summary).length === 0) {
           modalBody.innerHTML = `<div style="text-align:center; padding: 50px; font-family:sans-serif;">
               <h3>Fetching Live Data from GeM...</h3>
               <p>Please wait while we scrape the latest Seller and MII details.</p>
