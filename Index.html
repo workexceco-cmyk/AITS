@@ -3443,6 +3443,10 @@
             <div class="gem-section">
                 <div class="gem-sec-title-wrap"><h3 class="gem-sec-title">Seller Details</h3></div>
                 
+                <div style="margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                    ${allSellersHtml}
+                </div>
+
                 <div class="gem-row"><div class="gem-lbl">Sold by:</div><div class="gem-val bold">${esc(soldBy)}</div></div>
                 <div class="gem-row"><div class="gem-lbl">${esc(resVerified)}</div><div class="gem-val gem-alert">
                     <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
@@ -3451,16 +3455,6 @@
                     <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
                 </div></div>
                 <div class="gem-row"><div class="gem-lbl">Seller Excellence</div><div class="gem-val"><span class="gem-badge">${esc(sellerExc)}</span></div></div>
-                
-                <div class="gem-row" style="margin-top:20px;">
-                    <div class="gem-lbl">Seller Details</div>
-                    <div class="gem-val"><button class="gem-link-btn" onclick="document.getElementById('viewAllSellersBox').style.display='block'; this.style.display='none';">VIEW ALL SELLERS</button></div>
-                </div>
-
-                <!-- View All Sellers Sub-Section -->
-                <div id="viewAllSellersBox">
-                    ${allSellersHtml}
-                </div>
             </div>
             
             <a href="${esc(p.product_url || "#")}" target="_blank" style="display:block; text-align:center; padding:10px; background:#007bff; color:#fff; text-decoration:none; border-radius:4px; font-weight:bold; max-width:200px; margin: 20px auto 0;">View Product on GeM</a>
